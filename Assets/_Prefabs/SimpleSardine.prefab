@@ -216,9 +216,12 @@ GameObject:
   m_Component:
   - 4: {fileID: 4000011033073758}
   - 95: {fileID: 95000014171622234}
+  - 54: {fileID: 54000010528687834}
   - 114: {fileID: 114000012060530930}
+  - 135: {fileID: 135000013843751182}
+  - 64: {fileID: 64000013628611004}
   m_Layer: 0
-  m_Name: SimpleSardineNonRigid
+  m_Name: SimpleSardine
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1088,6 +1091,33 @@ Transform:
   m_Children: []
   m_Father: {fileID: 4000013837840428}
   m_RootOrder: 1
+--- !u!54 &54000010528687834
+Rigidbody:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1000011440699570}
+  serializedVersion: 2
+  m_Mass: 1
+  m_Drag: 5
+  m_AngularDrag: 2
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
+--- !u!64 &64000013628611004
+MeshCollider:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1000011440699570}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Convex: 0
+  m_Mesh: {fileID: 0}
 --- !u!95 &95000014171622234
 Animator:
   serializedVersion: 3
@@ -1118,11 +1148,23 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   speed: 1
   speedModifyer: 0.5
-  rotationSpeed: 2
-  applyRulesFactor: 15
-  neighborDistance: 2
-  scaredDist: 3
+  rotationSpeed: 1
+  applyRulesFactor: 2
+  neighborDistance: 3
+  scaredDist: 1.5
   destination: {x: 0, y: 0, z: 0}
+--- !u!135 &135000013843751182
+SphereCollider:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1000011440699570}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.5
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!136 &136000013638050360
 CapsuleCollider:
   m_ObjectHideFlags: 1

@@ -69,14 +69,14 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\Scripts\AvoidObject.cs" />
-    <Compile Include="Assets\Scripts\Fish.cs" />
-    <Compile Include="Assets\Scripts\GlobalFlock.cs" />
-    <Compile Include="Assets\Scripts\MoveCube.cs" />
-    <Compile Include="Assets\Scripts\ScaryObject.cs" />
+    <Compile Include="Assets\DemoScripts\MoveCube.cs" />
+    <Compile Include="Assets\_Scripts\Fish.cs" />
+    <Compile Include="Assets\_Scripts\GlobalFlock.cs" />
+    <Compile Include="Assets\_Scripts\Interactables\AvoidObject.cs" />
+    <Compile Include="Assets\_Scripts\Interactables\ScaryObject.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Assets\Models\Sardine\ReadMe.txt" />
+    <None Include="Assets\_Models\Sardine\ReadMe.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\SyntaxTree\UnityVS\2015\UnityVS.CSharp.targets" />
 </Project>
