@@ -36,7 +36,7 @@ public class GlobalFlock : MonoBehaviour
             goalPos = setPosInArea();
     }
 
-    private Vector3 setPosInArea() {
+    public Vector3 setPosInArea() {
         Vector3 p = new Vector3(Random.Range(-spawnArea, spawnArea), Random.Range(-spawnArea, spawnArea), Random.Range(-spawnArea, spawnArea));
         return p;
     }

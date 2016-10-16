@@ -69,9 +69,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\Scripts\AvoidObject.cs" />
     <Compile Include="Assets\Scripts\Fish.cs" />
     <Compile Include="Assets\Scripts\GlobalFlock.cs" />
     <Compile Include="Assets\Scripts\MoveCube.cs" />
+    <Compile Include="Assets\Scripts\ScaryObject.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Models\Sardine\ReadMe.txt" />

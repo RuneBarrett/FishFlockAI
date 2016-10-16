@@ -219,6 +219,7 @@ GameObject:
   - 54: {fileID: 54000010528687834}
   - 114: {fileID: 114000012060530930}
   - 135: {fileID: 135000013843751182}
+  - 64: {fileID: 64000013628611004}
   m_Layer: 0
   m_Name: SimpleSardine
   m_TagString: Untagged
@@ -1105,6 +1106,18 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!64 &64000013628611004
+MeshCollider:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1000011440699570}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Convex: 0
+  m_Mesh: {fileID: 0}
 --- !u!95 &95000014171622234
 Animator:
   serializedVersion: 3
@@ -1137,8 +1150,8 @@ MonoBehaviour:
   speedModifyer: 0.5
   rotationSpeed: 1
   applyRulesFactor: 4
-  neighborDistance: 4
-  scaredDist: 1
+  neighborDistance: 3
+  scaredDist: 1.5
   destination: {x: 0, y: 0, z: 0}
 --- !u!135 &135000013843751182
 SphereCollider:
