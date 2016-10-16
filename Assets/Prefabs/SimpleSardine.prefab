@@ -1135,9 +1135,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   speed: 1
   speedModifyer: 0.5
-  rotationSpeed: 2
+  rotationSpeed: 1
   applyRulesFactor: 5
-  neighborDistance: 3
+  neighborDistance: 5
   scaredDist: 1
   destination: {x: 0, y: 0, z: 0}
 --- !u!135 &135000013843751182

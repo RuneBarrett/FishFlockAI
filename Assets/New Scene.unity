@@ -119,7 +119,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   fishPrefab: {fileID: 1000011440699570, guid: 1255888c8900f81449bbd259b4d50366, type: 2}
   numFish: 15
-  spawnArea: 5
+  spawnArea: 7
   goalPos: {x: 0, y: 0, z: 0}
 --- !u!4 &1281637884
 Transform:
@@ -301,10 +301,10 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1418301278}
-  m_LocalRotation: {x: 0.40821788, y: -0.23456968, z: 0.10938163, w: 0.8754261}
+  m_LocalRotation: {x: 0.8572921, y: -0.11924883, z: 0.22971068, w: 0.44504276}
   m_LocalPosition: {x: 0, y: 3, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
+  m_LocalEulerAnglesHint: {x: 125.13, y: -30, z: 0}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 1
