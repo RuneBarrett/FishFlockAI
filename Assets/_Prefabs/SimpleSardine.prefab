@@ -1114,7 +1114,7 @@ MeshCollider:
   m_GameObject: {fileID: 1000011440699570}
   m_Material: {fileID: 0}
   m_IsTrigger: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 2
   m_Convex: 0
   m_Mesh: {fileID: 0}
@@ -1146,12 +1146,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ff26de87c9daa954c961b50e5a32e00a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 1
+  speed: 2
   speedModifyer: 0.5
   rotationSpeed: 1
   applyRulesFactor: 2
-  neighborDistance: 3
+  neighborRange: 2
+  tooCloseRange: 1
+  groupSpeedReset: 0.5
   scaredDist: 1.5
+  fleeSpeed: 5
   destination: {x: 0, y: 0, z: 0}
 --- !u!135 &135000013843751182
 SphereCollider:
@@ -1161,7 +1164,7 @@ SphereCollider:
   m_GameObject: {fileID: 1000011440699570}
   m_Material: {fileID: 0}
   m_IsTrigger: 1
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 2
   m_Radius: 0.5
   m_Center: {x: 0, y: 0, z: 0}
