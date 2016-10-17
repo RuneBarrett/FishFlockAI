@@ -17,9 +17,11 @@ public class GlobalFlock : MonoBehaviour
     */
     #endregion
 
-    private Vector3 goalPos = Vector3.zero; //A common goal posistion that used to adjust the position of all members in the group.
+    //private Vector3 goalPos = Vector3.zero; //A common goal posistion that used to adjust the position of all members in the group.
     private GameObject[] allFish;           //Holds all members
 
+    public GameObject[] goals;              //Contains the amount of goal meshes to use. 
+    public GameObject goalMesh;             //A visible goalPos.
     public GameObject fishPrefab;           //Whatever fish/bird/human/particle/bacteria you want. The Fish.cs needs to be attached to the prefab.
 
     public int numFish = 10;                //How many members
@@ -34,7 +36,7 @@ public class GlobalFlock : MonoBehaviour
 
         for (int i = 0; i < numFish; i++)
         {
-            Vector3 pos = setRandomPosInArea(); 
+            Vector3 pos = setRandomPosInArea(.5f); 
             GameObject fishObj = Instantiate(fishPrefab, pos, Quaternion.identity) as GameObject;
             fishObj.GetComponent<Fish>().SetFlockReference(this);
             fishObj.transform.parent = transform;
@@ -64,12 +66,26 @@ public class GlobalFlock : MonoBehaviour
 
     void Update()
     {
-        if (Random.Range(0, 100) < changeGoalPosFreq)
-            goalPos = setRandomPosInArea();
+        foreach (GameObject goal in goals)
+        {
+            if (Random.Range(0, 1000) < changeGoalPosFreq)
+            {
+                goal.transform.position = setRandomPosInArea(.8f); //This mesh is just to get a better understanding. To avoid this, simply remove the line below, and replace 'goalMesh.transform.position' with goalPos. You can remove the now unused goalMesh variable as well
+                //goalPos = goalMesh.transform.position;
+            }
+        }
+        /*if (Random.Range(0, 1000) < changeGoalPosFreq)
+        {
+            goalMesh.transform.position = setRandomPosInArea(.8f); //This mesh is just to get a better understanding. To avoid this, simply remove the line below, and replace 'goalMesh.transform.position' with goalPos. You can remove the now unused goalMesh variable as well
+            goalPos = goalMesh.transform.position;
+        }*/
+    
     }
 
-    public Vector3 setRandomPosInArea() {
-        Vector3 p = new Vector3(Random.Range(-spawnArea, spawnArea), Random.Range(-spawnArea, spawnArea), Random.Range(-spawnArea, spawnArea));
+    public Vector3 setRandomPosInArea(float areaPercentage) {
+        Vector3 p = new Vector3(Random.Range(-spawnArea * areaPercentage, spawnArea * areaPercentage),
+                                Random.Range(-spawnArea * areaPercentage, spawnArea * areaPercentage),
+                                Random.Range(-spawnArea * areaPercentage, spawnArea * areaPercentage));
         return p;
     }
 
@@ -79,6 +95,7 @@ public class GlobalFlock : MonoBehaviour
 
     internal Vector3 getGoalPos()
     {
-        return goalPos;
+        //return goalPos;
+        return goals[Random.Range(0, goals.Length)].transform.position;
     }
 }

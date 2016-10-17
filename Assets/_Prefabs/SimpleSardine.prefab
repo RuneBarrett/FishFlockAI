@@ -218,8 +218,6 @@ GameObject:
   - 95: {fileID: 95000014171622234}
   - 54: {fileID: 54000010528687834}
   - 114: {fileID: 114000012060530930}
-  - 135: {fileID: 135000013843751182}
-  - 64: {fileID: 64000013628611004}
   m_Layer: 0
   m_Name: SimpleSardine
   m_TagString: Untagged
@@ -1106,18 +1104,6 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!64 &64000013628611004
-MeshCollider:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1000011440699570}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 0
-  serializedVersion: 2
-  m_Convex: 0
-  m_Mesh: {fileID: 0}
 --- !u!95 &95000014171622234
 Animator:
   serializedVersion: 3
@@ -1146,28 +1132,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ff26de87c9daa954c961b50e5a32e00a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 2
-  speedModifyer: 0.5
-  rotationSpeed: 1
-  applyRulesFactor: 2
-  neighborRange: 2
+  speed: 3
+  speedModifyer: 0.3
+  rotationSpeed: 1.5
+  applyRulesFactor: 4
+  neighborRange: 5
   tooCloseRange: 1
   groupSpeedReset: 0.5
   scaredDist: 1.5
-  fleeSpeed: 5
-  destination: {x: 0, y: 0, z: 0}
---- !u!135 &135000013843751182
-SphereCollider:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1000011440699570}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 1
-  m_Enabled: 0
-  serializedVersion: 2
-  m_Radius: 0.5
-  m_Center: {x: 0, y: 0, z: 0}
+  fleeSpeed: 4
+  avoidDist: 3
 --- !u!136 &136000013638050360
 CapsuleCollider:
   m_ObjectHideFlags: 1

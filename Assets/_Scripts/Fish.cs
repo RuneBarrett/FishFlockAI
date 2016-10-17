@@ -14,6 +14,7 @@ public class Fish : MonoBehaviour
     private bool turnAround = false;        //Determines whether the fish is out of range
     private Vector3 scaredDirection;        //Stores the direction to move in when scared
     private Vector3 avoidDirection;         //Stores the direction to move in when avoiding
+    private Vector3 goalPos;
 
 
     public float speed = 0.03f;             //The approximate starting speed
@@ -29,46 +30,52 @@ public class Fish : MonoBehaviour
 
     public float avoidDist = 3f;            //How close to an avoidable object does the member need to be, to swim away.
 
-    public Vector3 destination;
+    //public Vector3 destination;
     #endregion
 
     void Start()
     {
-        destination = transform.position;
+        //destination = transform.position;
         initSpeed = speed;
 
         //Set the speed to a value slightly higher or lower, so the fish will move with varying speeds.
-        speed = CalculateSpeed(1f);//The parameter in CalulateSpeed is a speed modifyer. 1f is base speed, higher = faster, lower = slower. 
+        speed = CalculateSpeed(1f);//The float parameter in CalulateSpeed is a speed modifyer. 1f means base speed, higher = faster, lower = slower. 
+
+        goalPos = flock.getGoalPos();
     }
 
     void Update()
     {
+        if (Random.Range(0, 1000) <= 1f)
+            goalPos = flock.getGoalPos();
         if (!instatiated)
             InstatiateFish(); //Fill the array of fish from the GlobalFlock instance. We cant do this in Start() since the array is not full yet until the last fish is instatiated. Every fish needs to do this of course
 
-        //If the fish is out of allowed range turnAround = true, otherwise turnAround = false
+        //1. If the fish is out of allowed range turnAround = true, otherwise turnAround = false
         TurnAroundSwitch();
 
-        //Turn the fish around if 'turnAround'
         if (turnAround)
         {
-            Vector3 dir = flock.setRandomPosInArea() - transform.position;
+            //Turn the fish around ..
+            Vector3 dir = flock.setRandomPosInArea(.8f) - transform.position;
             Rotate(dir);
-            speed = CalculateSpeed(1f);
+            speed = CalculateSpeed(1f);// .. and randomize the speed
         }
-        //Else if a scary object is near, flee fast
-        else if (BecomeScared())
+
+        //2. If a scary object is nearby ..
+        else if (ScaryObjectNearby())
         {
             Rotate(scaredDirection);
-            CalculateSpeed(fleeSpeed);
+            CalculateSpeed(fleeSpeed); // .. flee fast 
         }
 
-        else if (AvoidObject()) {
+        //3. If an avoidable object is nearby ..
+        else if (AvoidObjectNearby()) {
             Rotate(avoidDirection);
-            CalculateSpeed(1f);
+            CalculateSpeed(1f); // .. move away 
         }
 
-        //Otherwise apply flocking rules
+        //4. Otherwise apply flocking rules
         else if (Random.Range(0, applyRulesFactor) < 1)
         {
             ApplyBasicRules();
@@ -76,13 +83,13 @@ public class Fish : MonoBehaviour
         if (speed < .5)
             speed = CalculateSpeed(1f);
 
-        //destination = (transform.rotation.eulerAngles);
+        //destination = new Vector3(0, 0, speed * Time.deltaTime);
         //transform.position = Vector3.Lerp(transform.position, destination, speed*Time.deltaTime);
         transform.Translate(new Vector3(0, 0, speed * Time.deltaTime));
 
     }
 
-    private bool AvoidObject()
+    private bool AvoidObjectNearby()
     {
         avoidDirection = Vector3.zero;
         Collider[] hitColliders = Physics.OverlapSphere(transform.position, scaredDist);
@@ -98,7 +105,7 @@ public class Fish : MonoBehaviour
         return false;
     }
 
-    private bool BecomeScared()
+    private bool ScaryObjectNearby()
     {
         scaredDirection = Vector3.zero;
         Collider[] hitColliders = Physics.OverlapSphere(transform.position, scaredDist);
@@ -119,7 +126,7 @@ public class Fish : MonoBehaviour
         Vector3 groupCenter = Vector3.zero;
         Vector3 avoidFishDir = Vector3.zero;
 
-        Vector3 goalPos = flock.getGoalPos();
+        goalPos = flock.getGoalPos();
         Vector3 thisPos = transform.position;
 
         float groupSpeed = CalculateSpeed(groupSpeedReset);
@@ -145,21 +152,27 @@ public class Fish : MonoBehaviour
 
                     //Prepare to adjust the groupSpeed by adding in the other fish's speed. 
                     groupSpeed += anotherFish.GetComponent<Fish>().GetSpeed();
+                    goalPos = anotherFish.GetComponent<Fish>().GetGoalPos();
                 }
             }
         }
 
         if (groupSize > 1)
         {
-            //Turn towards the center of the group, and change the speed of this fish, to the avarage speed of the group.
+            //Turn towards the center of the group and in the direction of the goal .. 
             groupCenter = groupCenter / groupSize + (goalPos - thisPos);
-            speed = groupSpeed / groupSize;
+            speed = groupSpeed / groupSize; //.. then change the speed of this fish to the avarage speed of the group.
 
             Vector3 dir = groupCenter + avoidFishDir;
 
             if (dir != Vector3.zero)
                 Rotate(dir);
         }
+    }
+
+    private Vector3 GetGoalPos()
+    {
+        return goalPos;
     }
 
     #region Utilities
@@ -187,6 +200,7 @@ public class Fish : MonoBehaviour
     private void InstatiateFish()
     {
         allFish = flock.getAllFish();
+
         instatiated = true;
     }
     #endregion
