@@ -11,26 +11,31 @@ public class Fish : MonoBehaviour
     private float initSpeed;                //Each members original speed. Not changing. 
     //private Vector3 averageHeading;
     //private Vector3 averagePosition;
-    private bool turnAround = false;        //Determines whether the fish is out of range
+    private bool turnAround = false;        //Determines whether the member is out of range
     private Vector3 scaredDirection;        //Stores the direction to move in when scared
     private Vector3 avoidDirection;         //Stores the direction to move in when avoiding
-    private Vector3 goalPosOld;
-    private GameObject goalPos;
+    private GameObject goalPos;             //The overall position the member is moving towards
 
+    /*
+    All of the below public varibles, and the similar fields in GlobalFlock.cs, change the behavior of the members. Be aware that many of them have 
+    conseqenses on the effect of other variables as well when changed. As an example, changing the amount of members in a given area without also changing 
+    the neighborRange, will change the amount of flocking the members do. Another example is how the speedModifier, if set to a high value, will reduce 
+    flocking as well, because the members are then more likely to move out of neighborRange.
+    */
 
-    public float speed = 0.03f;             //The approximate starting speed
-    public float speedModifyer = 0.2f;      //The modifier used to make the fish move with varying speeds. 
-    public float rotationSpeed = 1f;        //How fast the member turns
-    public float applyRulesFactor = 10f;    //Apply the 3 basic rules only one in <applyRulesFactor> times. This allows fish to sometimes swim away from the group, etc.
-    public float neighborRange = 2f;        //When is a member considered a neighbor, and is thus eligible for grouping.
+    public float speed = 2.8f;              //The approximate starting speed
+    public float speedModifyer = 0.5f;      //The modifier used to make the member move with varying speeds. (between 0-1f)
+    public float rotationSpeed = 2f;        //How fast the member turns
+    public float applyRulesFactor = 5f;     //Apply the 3 basic rules only one in <applyRulesFactor> times. This allows fish to sometimes swim away from the group, etc.
+    public float neighborRange = 5f;        //When is a member considered a neighbor, and is thus eligible for grouping.
     public float tooCloseRange = 1f;        //When is another member too close.
-    public float groupSpeedReset = 1.5f;    //The approximate speed a group will start with in the beginning of a frame. The avarage speed is then calculated including this number.
+    public float groupSpeedReset = .7f;     //The approximate speed a group will start with in the beginning of a frame. The avarage speed is then calculated including this number.
 
-    public float scaredDist = 3f;           // How close to a scary object does the member need to be, to start fleeing.
+    public float scaredDist = 1.5f;         // How close to a scary object does the member need to be, to start fleeing.
     public float fleeSpeed = 5f;            //The speed modifier used for fleeing
 
-    public float avoidDist = 3f;            //How close to an avoidable object does the member need to be, to swim away.
-    public float aloneSpeed;                //Move faster while alone
+    public float avoidDist = .5f;           //How close to an avoidable object does the member need to be, to swim away.
+    public float aloneSpeed = 1.5f;         //Move faster while alone
 
     //public Vector3 destination;
     #endregion
@@ -55,7 +60,7 @@ public class Fish : MonoBehaviour
             InstatiateFish(); //Fill the array of fish from the GlobalFlock instance. We cant do this in Start() since the array is not full yet until the last fish is instatiated. Every fish needs to do this of course
 
         //1. If the fish is out of allowed range turnAround = true, otherwise turnAround = false
-        TurnAroundSwitch();
+        turnAround = TurnAroundSwitch();
 
         if (turnAround)
         {
@@ -200,7 +205,7 @@ public class Fish : MonoBehaviour
         return flock.SlightlyRandomizeValue(speed, speedModifyer);
     }
 
-    private void TurnAroundSwitch()
+    private bool TurnAroundSwitch()
     {
         Vector3 x = new Vector3(transform.position.x, 0, 0);
         Vector3 y = new Vector3(0, transform.position.y, 0);
@@ -210,20 +215,13 @@ public class Fish : MonoBehaviour
         if (Vector3.Distance(x, Vector3.zero) > t.localScale.x / 2 ||
             Vector3.Distance(y, Vector3.zero) > t.localScale.y / 2 ||
             Vector3.Distance(z, Vector3.zero) > t.localScale.z / 2)
-            turnAround = true;
+            return true;
         else
-            turnAround = false;
-    }
-
-    private void InstatiateFish()
-    {
-        allFish = flock.getAllFish();
-
-        instatiated = true;
+            return false;
     }
     #endregion
-    #region Accessors
-    private float GetSpeed()
+    #region Accessors & Internal Utilities
+    public float GetSpeed()
     {
         return speed;
     }
@@ -231,6 +229,12 @@ public class Fish : MonoBehaviour
     public void SetFlockReference(GlobalFlock f)
     {
         flock = f;
+    }
+
+    private void InstatiateFish()
+    {
+        allFish = flock.getAllFish();
+        instatiated = true;
     }
     #endregion
 }

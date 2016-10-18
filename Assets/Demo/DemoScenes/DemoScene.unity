@@ -873,13 +873,12 @@ MonoBehaviour:
   goals:
   - {fileID: 771733579}
   - {fileID: 1078858257}
-  goalMesh: {fileID: 771733579}
   fishPrefab: {fileID: 1000011440699570, guid: 1255888c8900f81449bbd259b4d50366, type: 2}
   numFish: 45
   SpawnArea: {fileID: 810584939}
   randomizePrefabSize: 1
   sizeModifier: 0.5
-  changeGoalPosFreq: 5
+  changeGoalPosFreq: 1
 --- !u!4 &1281637884
 Transform:
   m_ObjectHideFlags: 0
@@ -1109,7 +1108,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1432799798
 Transform:
   m_ObjectHideFlags: 0
@@ -1194,7 +1193,7 @@ GUIText:
   m_Font: {fileID: 0}
   m_Material: {fileID: 0}
   m_FontSize: 0
-  m_FontStyle: 3
+  m_FontStyle: 0
   m_Color:
     serializedVersion: 2
     rgba: 4294967295

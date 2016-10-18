@@ -9,8 +9,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5775844f6e499034eb955d3c113ed57e, type: 3}
-  m_Name: New TerrainVolumeData 1
+  m_Name: TerVolDataFishArea
   m_EditorClassIdentifier: 
   basePath: 0
-  relativePathToVoxelDatabase: 33E69102.vdb
+  relativePathToVoxelDatabase: 245FF90F.vdb
   mWritePermissions: 1

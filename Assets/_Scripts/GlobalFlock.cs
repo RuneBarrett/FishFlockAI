@@ -21,7 +21,7 @@ public class GlobalFlock : MonoBehaviour
     private GameObject[] allFish;           //Holds all members
 
     public GameObject[] goals;              //Contains the amount of goal meshes to use. 
-    public GameObject goalMesh;             //A visible goalPos.
+    //public GameObject goalMesh;             //A visible goalPos.
     public GameObject fishPrefab;           //Whatever fish/bird/human/particle/bacteria you want. The Fish.cs needs to be attached to the prefab.
 
     public int numFish = 10;                //How many members

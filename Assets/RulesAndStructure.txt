@@ -1,0 +1,29 @@
+This document contains the rules implemented, as well as to be implemented.
+
+The structure described includes the state machine, even though it has yet to be implemented.
+
+All States:
+	1. Avoidance Rules.
+		a. A member flee's in the opposite direction when a scary object comes within range from any side.
+		b. A member turns away from an avoid object when it gets close (Could be oil, floating sand or other non-scary unpleasant objects) 
+
+State 1: Flocking (The usual state for a member) (NOT YET IMPLEMENTED)
+	1. Classic Flocking Rules.
+		a. Alignment: All members must move towards the common direction of the group.
+		b. Cohesion: All members must move towards the common centre of the group. 
+		c. Seperation: All members must steer away from other members within a given range.
+
+	2. Additional Flocking Rules.
+		a. A member should always stay within the given area. 
+		b. When in flocking state, but not currently in a group (moving alone), move faster to increase the chance of meeting a group.
+		c. When flocking the group should not swim to much along the edges of the area, since this seems unnatural. (NOT YET IMPLEMENTED)
+		d. When approaching a surface and the group is smaller than a set amount, sometimes alter direction to move along the surface. (NOT YET IMPLEMENTED)
+		
+
+State 2: Resting (Lying still, or moving slowly) (Entered from: Flocking) (NOT YET IMPLEMENTED)
+		Entered: After a set amount of exhaustion is reached / Semi Random Time spent / other condition
+		a. Search for a place with good resting conditions (shadow/hiding places) (NOT YET IMPLEMENTED)
+		a. Move slowly with intervals of lying still. (NOT YET IMPLEMENTED)
+
+
+

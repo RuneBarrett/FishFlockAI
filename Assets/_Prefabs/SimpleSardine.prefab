@@ -1136,13 +1136,13 @@ MonoBehaviour:
   speedModifyer: 0.5
   rotationSpeed: 2
   applyRulesFactor: 5
-  neighborRange: 5
-  tooCloseRange: 1
+  neighborRange: 7
+  tooCloseRange: 1.5
   groupSpeedReset: 0.7
   scaredDist: 1.5
   fleeSpeed: 5
   avoidDist: 0.5
-  aloneSpeed: 1.5
+  aloneSpeed: 3
 --- !u!136 &136000013638050360
 CapsuleCollider:
   m_ObjectHideFlags: 1
