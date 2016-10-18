@@ -28,3 +28,28 @@ sysinfo.txt
 # Builds
 *.apk
 *.unitypackage
+
+
+#Cubiquity related 
+*.sdf
+*.opensdf
+*.suo
+cmake_install.cmake
+cubiquity/CMakeFiles
+cubiquity/Core/CMakeFiles
+cubiquity/Examples/CubiquityCTest/CMakeFiles
+cubiquity/Examples/OpenGL/CMakeFiles
+cubiquity/Examples/OpenGL/external/CMakeFiles
+cubiquity/Tools/ProcessVDB/CMakeFiles
+*.user
+cubiquity-native-plugin/VisualStudio2013/x64
+*.log
+/cubiquity-for-unity3d/obj/Debug
+/cubiquity-for-unity3d/Assets/Plugins/x86_64
+/cubiquity-for-unity3d/Assets/StreamingAssets/Cubiquity/Shaders
+/cubiquity-for-unity3d/Assets/StreamingAssets/Cubiquity/VoxelDatabases
+/cubiquity-native-plugin/VisualStudio2013/Release
+/cubiquity-native-plugin/VisualStudio2013/build/Release
+/cubiquity-native-plugin/VisualStudio2013/Debug
+/cubiquity-native-plugin/VisualStudio2013/build/Debug
+build

@@ -1132,16 +1132,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ff26de87c9daa954c961b50e5a32e00a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 3
-  speedModifyer: 0.3
-  rotationSpeed: 1.5
-  applyRulesFactor: 4
+  speed: 2.8
+  speedModifyer: 0.5
+  rotationSpeed: 2
+  applyRulesFactor: 5
   neighborRange: 5
   tooCloseRange: 1
-  groupSpeedReset: 0.5
+  groupSpeedReset: 0.7
   scaredDist: 1.5
-  fleeSpeed: 4
-  avoidDist: 3
+  fleeSpeed: 5
+  avoidDist: 0.5
+  aloneSpeed: 1.5
 --- !u!136 &136000013638050360
 CapsuleCollider:
   m_ObjectHideFlags: 1
