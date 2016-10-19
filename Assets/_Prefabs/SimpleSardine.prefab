@@ -1132,17 +1132,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ff26de87c9daa954c961b50e5a32e00a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 2.8
-  speedModifyer: 0.5
+  volume: {fileID: 0}
+  speed: 2.2
+  speedModifyer: 0.8
   rotationSpeed: 2
-  applyRulesFactor: 5
-  neighborRange: 7
-  tooCloseRange: 1.5
-  groupSpeedReset: 0.7
-  scaredDist: 1.5
-  fleeSpeed: 5
-  avoidDist: 0.5
+  applyRulesFactor: 6
+  neighborRange: 4
+  tooCloseRange: 2
+  groupSpeedReset: 0.85
+  scaredDist: 3
+  fleeSpeed: 4
+  avoidDist: 0.8
   aloneSpeed: 3
+  turnTimer: 1.5
 --- !u!136 &136000013638050360
 CapsuleCollider:
   m_ObjectHideFlags: 1

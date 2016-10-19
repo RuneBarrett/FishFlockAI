@@ -7,7 +7,7 @@ public class GlobalFlock : MonoBehaviour
     // Flocking reference, AI for Game Developers by Glenn Seemann, David M Bourg Chapter 4
     // https://www.safaribooksonline.com/library/view/ai-for-game/0596005555/ch04.html
 
-    // The ApplyBasicRules() function handles the three basic flocking rules, and is originally based on Holistic3d's imlementation described here.
+    // The ApplyBasicFlockingRules() function handles the three basic flocking rules, and is originally based on Holistic3d's imlementation described in a video by herself here:
     // https://www.youtube.com/watch?v=eMpI1eCsIyM
     #endregion
     #region Description
@@ -17,102 +17,105 @@ public class GlobalFlock : MonoBehaviour
     */
     #endregion
 
-    //private Vector3 goalPos = Vector3.zero; //A common goal posistion that used to adjust the position of all members in the group.
+    //private Vector3 goalPos = Vector3.zero; 
+    private FlockAIUtilities utilities;
     private GameObject[] allFish;           //Holds all members
 
-    public GameObject[] goals;              //Contains the amount of goal meshes to use. 
-    //public GameObject goalMesh;             //A visible goalPos.
+    public GameObject[] goals;              //Contains the amount of goal meshes to use. Each goal is a common posistion that used to adjust the position of all members in one group. The amount of goals determines how many groups your flock can form.
     public GameObject fishPrefab;           //Whatever fish/bird/human/particle/bacteria you want. The Fish.cs needs to be attached to the prefab.
 
-    public int numFish = 10;                //How many members
-    //public int spawnArea = 5;               //(half the actual size) //NOTE: use mesh for size instead
-    public GameObject SpawnArea; 
-    public bool randomizePrefabSize = true; //Whether or not the size of the prefab should be randomized (Only cosmetic)
-    public float sizeModifier = .4f;        //If size is randomized, this is how much they will differ from their original size
-    public float changeGoalPosFreq = .5f;   //Randomizes goalPos around <changeGoalPosFreq> times in 100 frames
+    public int numFish = 30;                //How many members
+    public GameObject SpawnArea;            //The area members can spawn and move in.
+    public bool randomizePrefabSize = true; //Whether or not the size of the prefab should be randomized.
+    public float sizeModifier = .55f;        //If size is randomized, this is how much they will differ from their original size
+    public float changeGoalPosFreq = 2f;   //Randomizes goalPos around <changeGoalPosFreq> times in 1000 frames
 
     void Start()
     {
+        utilities = new FlockAIUtilities();
         allFish = new GameObject[numFish];
 
+        foreach (GameObject goal in goals)
+        {
+
+                goal.transform.position = utilities.setRandomPosInArea(SpawnArea, .7f);
+            
+        }
+
+        //Instantiate all the fish at random positions, and store them in allFish[]
         for (int i = 0; i < numFish; i++)
         {
-            Vector3 pos = setRandomPosInArea(.5f); 
+            Vector3 pos = utilities.setRandomPosInArea(SpawnArea, .5f);
             GameObject fishObj = Instantiate(fishPrefab, pos, Quaternion.identity) as GameObject;
             fishObj.GetComponent<Fish>().SetFlockReference(this);
             fishObj.transform.parent = transform;
             allFish[i] = fishObj;
         }
 
-        if (randomizePrefabSize)
-            RandomizeSize();
-        
-    }
-
-    private void RandomizeSize()
-    {
-        if (sizeModifier >= 1f)
-            sizeModifier = 0.9f;
-             
-        foreach (GameObject fish in allFish) {
-            fish.gameObject.transform.localScale += new Vector3(
-                SlightlyRandomizeValue(fish.transform.localScale.x, sizeModifier),
-                SlightlyRandomizeValue(fish.transform.localScale.y, sizeModifier),
-                SlightlyRandomizeValue(fish.transform.localScale.z, sizeModifier)); 
-        }
-
-    }
-
-    public float SlightlyRandomizeValue(float val, float modifier)
-    {
-        return val + val * Random.Range(-modifier, modifier);
+        if (randomizePrefabSize) //Slightly modify the size of the model prefab if chosen
+            allFish = utilities.randomizeSize(allFish, sizeModifier);
     }
 
     void Update()
     {
+        //Change the position of each goal once in a while (Frequency determined by 'changeGoalPosFreq') 
         foreach (GameObject goal in goals)
         {
             if (Random.Range(0, 1000) < changeGoalPosFreq)
             {
-                goal.transform.position = setRandomPosInArea(.8f); //This mesh is just to get a better understanding. To avoid this, simply remove the line below, and replace 'goalMesh.transform.position' with goalPos. You can remove the now unused goalMesh variable as well
-                //goalPos = goalMesh.transform.position;
+                goal.transform.position = utilities.setRandomPosInArea(SpawnArea, .85f);
             }
         }
-        /*if (Random.Range(0, 1000) < changeGoalPosFreq)
-        {
-            goalMesh.transform.position = setRandomPosInArea(.8f); //This mesh is just to get a better understanding. To avoid this, simply remove the line below, and replace 'goalMesh.transform.position' with goalPos. You can remove the now unused goalMesh variable as well
-            goalPos = goalMesh.transform.position;
-        }*/
-    
     }
 
-    public Vector3 setRandomPosInArea(float areaPercentage) {
-        /*Vector3 p = new Vector3(Random.Range(-spawnArea * areaPercentage, spawnArea * areaPercentage),
-                                Random.Range(-spawnArea * areaPercentage, spawnArea * areaPercentage),
-                                Random.Range(-spawnArea * areaPercentage, spawnArea * areaPercentage));*/
-        if (areaPercentage > 1)
-            areaPercentage = 1;
-
-        Transform t = SpawnArea.transform;
-        Vector3 p = new Vector3(Random.Range(-t.localScale.x / 2 * areaPercentage, t.localScale.x / 2 * areaPercentage),
-                                Random.Range(-t.localScale.y / 2 * areaPercentage, t.localScale.y / 2 * areaPercentage),
-                                Random.Range(-t.localScale.z / 2 * areaPercentage, t.localScale.z / 2 * areaPercentage));
-        /* //print(t.localScale.x * (1f - areaPercentage/2) + " " + t.localScale.x * areaPercentage/2 + " " +t.localScale.x);
-         float x = Random.Range(t.localScale.x * (1f - areaPercentage/2), t.localScale.x * areaPercentage/2);
-         float y = Random.Range(t.localScale.y * (1f - areaPercentage/2), t.localScale.y * areaPercentage/2);
-         float z = Random.Range(t.localScale.z * (1f - areaPercentage/2), t.localScale.z * areaPercentage/2);
-         //print(x+" "+y+" "+ z);
-         Vector3 p = new Vector3(x, y, z);*/
-        return p;
+    public Vector3 setRandomPosShortcut(float mod)
+    {
+        return utilities.setRandomPosInArea(SpawnArea, mod);
     }
 
-    internal GameObject[] getAllFish() {
+    public GameObject[] getAllFish()
+    {
         return allFish;
     }
 
-    internal GameObject getGoalPos()
+    public GameObject getSpawnArea()
     {
-        //return goalPos;
+        return SpawnArea;
+    }
+
+    public GameObject getGoalPos()
+    {
         return goals[Random.Range(0, goals.Length)];
     }
+    #region Deprecated
+    /*private GameObject[] randomizeSize(GameObject[] members, float sizeMod)//allFish, sizeModifier
+    {
+        if (sizeModifier >= 1f)
+            sizeModifier = 0.9f;
+
+        foreach (GameObject fish in members)
+        {
+            fish.gameObject.transform.localScale += new Vector3(
+                slightlyRandomizeValue(fish.transform.localScale.x, sizeMod),
+                slightlyRandomizeValue(fish.transform.localScale.y, sizeMod),
+                slightlyRandomizeValue(fish.transform.localScale.z, sizeMod));
+        }
+        return allFish;
+    }*/
+    /*public float slightlyRandomizeValue(float val, float modifier)
+    {
+        return val + val * Random.Range(-modifier, modifier);
+    }*/
+    /*    public Vector3 setRandomPosInArea(float areaPercentage) {
+
+            if (areaPercentage > 1)
+                areaPercentage = 1;
+
+            Transform t = SpawnArea.transform;
+            Vector3 p = new Vector3(Random.Range(-t.localScale.x / 2 * areaPercentage, t.localScale.x / 2 * areaPercentage),
+                                    Random.Range(-t.localScale.y / 2 * areaPercentage, t.localScale.y / 2 * areaPercentage),
+                                    Random.Range(-t.localScale.z / 2 * areaPercentage, t.localScale.z / 2 * areaPercentage));
+            return p;
+        }*/
+    #endregion
 }
