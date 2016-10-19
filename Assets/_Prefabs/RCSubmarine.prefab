@@ -26,7 +26,7 @@ GameObject:
   - 114: {fileID: 114000012869713308}
   - 64: {fileID: 64000010379979328}
   m_Layer: 0
-  m_Name: ScarySub
+  m_Name: RCSubmarine
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -118,11 +118,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ff26de87c9daa954c961b50e5a32e00a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  volume: {fileID: 0}
   speed: 2.8
   speedModifyer: 0.5
-  rotationSpeed: 2
-  applyRulesFactor: 2
+  rotationSpeed: 3
+  applyRulesFactor: 4
   neighborRange: 10
   tooCloseRange: 2
   groupSpeedReset: 0.8
@@ -131,6 +130,9 @@ MonoBehaviour:
   avoidDist: 0.5
   aloneSpeed: 1.5
   turnTimer: 3
+  interactTimer: 0.5
+  viewDistance: 6
+  terrainName: Octree
 --- !u!114 &114000012869713308
 MonoBehaviour:
   m_ObjectHideFlags: 1

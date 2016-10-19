@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
-using Cubiquity;
+//using Cubiquity;
 
 public class Fish : MonoBehaviour
 {
@@ -13,14 +13,15 @@ public class Fish : MonoBehaviour
 
     private float initSpeed;                //Each members original speed. Not changing. 
     private float initTurnTimer;            //Used for resetting the turntimer
+    private float initInteractTimer;
     //private Vector3 averageHeading;
     //private Vector3 averagePosition;
     private Vector3 scaredDirection;        //Stores the direction to move in when scared
     private Vector3 avoidDirection;         //Stores the direction to move in when avoiding
     private GameObject goalPos;             //The overall position the member is moving towards
-    private bool turning = false;           //Determines whether the fish recently turned around from one of the sides
 
-    public TerrainVolume volume;
+    private bool turning = false;           //Determines whether the fish recently turned around from one of the sides
+    private bool interacting = false;        //Determines whether the fish recently interacted with a static object like terrain, or another fish
 
     /* Public Variables Description
     All of the below public varibles, and the similar fields in GlobalFlock.cs, change the behavior of the members. Be aware that many of them have 
@@ -43,6 +44,7 @@ public class Fish : MonoBehaviour
     public float aloneSpeed = 1.5f;         //Move faster while alone
 
     public float turnTimer = 2f;
+    public float interactTimer = .5f;
     public float viewDistance = 2f;
 
     public string terrainName = "Octree";   //Replace with the name (or part of it) of the terrain or terrain nodes you want to hit with raycasting. Can be done simpler with tags, but not when using a voxel terrain generated with Cubiquity. 
@@ -55,7 +57,7 @@ public class Fish : MonoBehaviour
     {       
         utilities = new FlockAIUtilities();
 
-        volume = GameObject.FindGameObjectWithTag("Terrain").GetComponent<TerrainVolume>();
+        //volume = GameObject.FindGameObjectWithTag("Terrain").GetComponent<TerrainVolume>();
 
         initSpeed = speed;
         initTurnTimer = turnTimer;
@@ -79,8 +81,17 @@ public class Fish : MonoBehaviour
         if(!turning)
             switch (state)
             {
+                //State 1: Flocking
                 case States.flocking:
                     FlockingUpdate();
+                    break;
+                //State 2: Resting
+                case States.resting:
+                    RestingUpdate();
+                    break;
+                //State 3: Playful
+                case States.playing:
+                    PlayingUpdate();
                     break;
             }
 
@@ -95,12 +106,11 @@ public class Fish : MonoBehaviour
     }
 
 
-    #region Pre & Post Updates
 
+
+    #region Pre & Post Updates
     private void PreStateUpdate() //This will only happen if it is not overwritten by the current state, or PostAllStatesUpdate()
     {
-        //SwimAlongSurface();
-
         if (turning)
         {
             turnTimer -= Time.deltaTime;
@@ -111,41 +121,20 @@ public class Fish : MonoBehaviour
             }
         }
 
+        if (interacting)
+        {
+            interactTimer -= Time.deltaTime;
+            if (interactTimer <= 0)
+            {
+                interacting = false;
+                interactTimer = initInteractTimer;
+            }
+        }
+
         //Use raycasting to give the fish information on its surroundings
         fishVision();
-
     }
 
-    private void fishVision()
-    {
-        RaycastHit hit;
-        Ray ray = new Ray(transform.position, transform.forward);
-        //PickSurfaceResult pickRes;
-        /*if (Picking.PickSurface(volume, ray, viewDistance, out pickRes)) {
-            //print("I am looking at" + pickRes.volumeSpacePos);
-            //Debug.DrawRay(transform.position, transform.forward*viewDistance, Color.green);
-            Debug.DrawRay(transform.position, -pickRes.worldSpacePos, Color.red);
-        }*/
-
-        if (Physics.Raycast(ray, out hit, viewDistance))
-        {
-            Debug.DrawRay(transform.position, transform.forward*viewDistance, Color.green);
-            if (hit.transform.name.Contains("Octree"))
-            {
-                //print("terrain");
-                Rotate(new Vector3(0.5f,0,0));
-                //print(Vector3.Angle(hit.normal, -transform.forward * viewDistance));
-                print(hit.normal.x + " | " + hit.normal.y + " | " +hit.normal.z);
-                Rotate(new Vector3(hit.normal.x, hit.normal.y, hit.normal.z)*1.5f);
-            }
-
-            if (hit.transform.name.Contains("SimpleSardine"))
-            {
-                //print("fish");
-            }
-
-        }
-    }
     private void PostStateUpdate() //This will owerwrite changes made by the current state.
     {
         //If the fish is out of allowed range, find a new target position within the area.
@@ -172,8 +161,55 @@ public class Fish : MonoBehaviour
             CalculateSpeed(fleeSpeed, true); // .. flee fast 
         }
     }
-
     #endregion
+
+    #region Vision
+    private void fishVision()
+    {
+        RaycastHit hit;
+        bool turned = false;
+        if (!interacting)
+        {
+            Ray rayForward = new Ray(transform.position, transform.forward);
+            if (Physics.Raycast(rayForward, out hit, viewDistance))
+            {
+                Debug.DrawRay(transform.position, transform.forward * viewDistance, Color.green);
+                if (hit.transform.name.Contains("Octree"))//Rotate to match the eulerAngles of the part of the terrain hit. 
+                {
+                    Rotate(new Vector3(hit.normal.x, hit.normal.y, 0));//hit.normal.x, hit.normal.z
+                    turned = true; interacting = true;
+                }
+
+                if (hit.transform.name.Contains("SimpleSardine"))//If the hit result is another fish in front of this one and it's in another group, sometimes switch to that group
+                {
+                    if (Random.Range(0, 50) < 1f && hit.transform.GetComponent<Fish>().GetGoal() != goalPos)
+                    {
+                        goalPos = hit.transform.GetComponent<Fish>().GetGoal();
+                    }
+                }
+
+            }
+
+            Ray rayDown = new Ray(transform.position, -transform.up);
+            if (Physics.Raycast(rayDown, out hit, viewDistance) && !turned)
+            {
+                if (hit.transform.name.Contains("Octree"))
+                {
+                    Debug.DrawRay(transform.position + new Vector3(0, 0, .5f), -transform.up * viewDistance, Color.red);
+                    Rotate(new Vector3(hit.normal.x, hit.normal.y,0));
+                    turned = true; interacting = true;
+                }
+
+                if (hit.transform.name.Contains("SimpleSardine"))
+                {
+                    //print("fish");
+                }
+
+            }
+        }
+    }
+    #endregion
+
     #region State Updates
     private void FlockingUpdate()
     {
@@ -236,6 +272,16 @@ public class Fish : MonoBehaviour
                     Rotate(dir);
             }
         }
+    }
+
+    private void PlayingUpdate()
+    {
+        
+    }
+
+    private void RestingUpdate()
+    {
+        
     }
     #endregion
 
@@ -325,6 +371,10 @@ public class Fish : MonoBehaviour
     public void SetFlockReference(GlobalFlock f)
     {
         flock = f;
+    }
+
+    public GameObject GetGoal() {
+        return goalPos;
     }
 
     #endregion
