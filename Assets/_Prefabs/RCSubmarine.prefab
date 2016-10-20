@@ -120,7 +120,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   speed: 2.8
   speedModifyer: 0.5
-  rotationSpeed: 3
+  rotationSpeed: 2
   applyRulesFactor: 4
   neighborRange: 10
   tooCloseRange: 2

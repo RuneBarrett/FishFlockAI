@@ -650,7 +650,7 @@ Transform:
   m_GameObject: {fileID: 1000011440699570}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 2, y: 2, z: 2}
+  m_LocalScale: {x: 2.3, y: 2.3, z: 2.3}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_Children:
   - {fileID: 4000013254132802}
@@ -1132,19 +1132,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ff26de87c9daa954c961b50e5a32e00a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 2.2
-  speedModifyer: 0.8
-  rotationSpeed: 3
+  speed: 2.5
+  speedModifyer: 0.6
+  rotationSpeed: 2.3
   applyRulesFactor: 12
-  neighborRange: 4
+  neighborRange: 6
   tooCloseRange: 2
   groupSpeedReset: 0.85
-  scaredDist: 5
+  scaredDist: 6.5
   fleeSpeed: 4
   avoidDist: 0.8
   aloneSpeed: 3
   turnTimer: 1.5
-  interactTimer: 0.5
+  interactTimer: 0.2
   viewDistance: 1
   terrainName: Octree
 --- !u!136 &136000013638050360

@@ -18,6 +18,8 @@ public class Fish : MonoBehaviour
     //private Vector3 averagePosition;
     private Vector3 scaredDirection;        //Stores the direction to move in when scared
     private Vector3 avoidDirection;         //Stores the direction to move in when avoiding
+    private Vector3 avoidTerrainDirection;
+
     private GameObject goalPos;             //The overall position the member is moving towards
 
     private bool turning = false;           //Determines whether the fish recently turned around from one of the sides
@@ -44,7 +46,7 @@ public class Fish : MonoBehaviour
     public float aloneSpeed = 1.5f;         //Move faster while alone
 
     public float turnTimer = 2f;
-    public float interactTimer = .5f;
+    public float interactTimer = .2f;
     public float viewDistance = 2f;
 
     public string terrainName = "Octree";   //Replace with the name (or part of it) of the terrain or terrain nodes you want to hit with raycasting. Can be done simpler with tags, but not when using a voxel terrain generated with Cubiquity. 
@@ -97,7 +99,7 @@ public class Fish : MonoBehaviour
 
         if (speed < .5)
             speed = CalculateSpeed(.8f, true);
-        
+
         //What needs to happen after the state update
         PostStateUpdate();
 
@@ -105,7 +107,10 @@ public class Fish : MonoBehaviour
         transform.Translate(new Vector3(0, 0, speed * Time.deltaTime));
     }
 
+    void FixedUpdate() {
 
+
+    }
 
 
     #region Pre & Post Updates
@@ -131,8 +136,7 @@ public class Fish : MonoBehaviour
             }
         }
 
-        //Use raycasting to give the fish information on its surroundings
-        fishVision();
+
     }
 
     private void PostStateUpdate() //This will owerwrite changes made by the current state.
@@ -148,11 +152,11 @@ public class Fish : MonoBehaviour
         }
 
         //If an avoidable object is nearby ..
-        if (AvoidObjectNearby())
+        /*if (AvoidObjectNearby())
         {
             Rotate(avoidDirection);
             CalculateSpeed(1f, true); // .. move away 
-        }
+        }*/
 
         //If a scary object is nearby ..
         if (ScaryObjectNearby())
@@ -160,6 +164,35 @@ public class Fish : MonoBehaviour
             Rotate(scaredDirection);
             CalculateSpeed(fleeSpeed, true); // .. flee fast 
         }
+
+        //Use raycasting to give the fish information on its surroundings
+        fishVision();
+
+        //If colliding with terrain
+        if (TerrainCollision())
+        {
+            Rotate(avoidTerrainDirection);
+            CalculateSpeed(1f, true);
+        }
+    }
+
+    private bool TerrainCollision()
+    {
+        //Collision safety check
+        
+        avoidTerrainDirection = Vector3.zero;
+        Collider[] hitColliders = Physics.OverlapSphere(transform.position, 1f);
+        foreach (Collider c in hitColliders)
+        {
+            if (c.transform.name.Contains(terrainName))
+            {
+                //print("Collision");
+                avoidTerrainDirection = -(c.gameObject.transform.position - transform.position);
+                return true;
+            }
+
+        }
+        return false;
     }
     #endregion
 
@@ -170,17 +203,23 @@ public class Fish : MonoBehaviour
         bool turned = false;
         if (!interacting)
         {
-            Ray rayForward = new Ray(transform.position, transform.forward);
-            if (Physics.Raycast(rayForward, out hit, viewDistance))
+            //Forward Ray
+            Quaternion rot = transform.rotation;
+            Ray rayForward = new Ray(transform.position+new Vector3(0,1,0), transform.forward);
+            if (Physics.Raycast(rayForward, out hit, viewDistance*.7f))
             {
-                Debug.DrawRay(transform.position, transform.forward * viewDistance, Color.green);
-                if (hit.transform.name.Contains("Octree"))//Rotate to match the eulerAngles of the part of the terrain hit. 
+                Debug.DrawRay(transform.position, transform.forward * viewDistance*1.5f, Color.green);
+
+                //Rotate to match the eulerAngles of the part of the terrain hit.
+                if (hit.transform.name.Contains("Octree")) 
                 {
-                    Rotate(new Vector3(hit.normal.x, hit.normal.y, 0));//hit.normal.x, hit.normal.z
+                    //Rotate(new Vector3(hit.normal.x, hit.normal.y, 0)*1.5f);//hit.normal.x, hit.normal.z
                     turned = true; interacting = true;
+                    transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(-transform.forward), rotationSpeed * Time.deltaTime);
                 }
 
-                if (hit.transform.name.Contains("SimpleSardine"))//If the hit result is another fish in front of this one and it's in another group, sometimes switch to that group
+                //If the hit result is another fish in front of this one and it's in another group, sometimes switch to that group
+                if (hit.transform.name.Contains("SimpleSardine"))
                 {
                     if (Random.Range(0, 50) < 1f && hit.transform.GetComponent<Fish>().GetGoal() != goalPos)
                     {
@@ -190,22 +229,55 @@ public class Fish : MonoBehaviour
 
             }
 
+            //Up Ray
+            Ray rayUp = new Ray(transform.position, transform.up);
+            if (Physics.Raycast(rayUp, out hit, viewDistance) && !turned)
+            {
+                if (hit.transform.name.Contains("Octree"))
+                {
+                    Debug.DrawRay(transform.position, transform.up * viewDistance, Color.cyan);
+                    Rotate(new Vector3(hit.normal.x, hit.normal.y, 0)*2);
+                    turned = true; interacting = true;
+                }
+            }
+
+            //Down Ray
             Ray rayDown = new Ray(transform.position, -transform.up);
             if (Physics.Raycast(rayDown, out hit, viewDistance) && !turned)
             {
                 if (hit.transform.name.Contains("Octree"))
                 {
-                    Debug.DrawRay(transform.position + new Vector3(0, 0, .5f), -transform.up * viewDistance, Color.red);
-                    Rotate(new Vector3(hit.normal.x, hit.normal.y,0));
+                    Debug.DrawRay(transform.position, -transform.up * viewDistance, Color.red);
+                    Rotate(new Vector3(hit.normal.x, hit.normal.y,0)*.65f);
                     turned = true; interacting = true;
                 }
-
-                if (hit.transform.name.Contains("SimpleSardine"))
-                {
-                    //print("fish");
-                }
-
             }
+
+            //Right Ray
+            Ray rayRight = new Ray(transform.position, (transform.right + new Vector3(0, .25f, 0)));
+            if (Physics.Raycast(rayRight, out hit, viewDistance) && !turned)
+            {
+                if (hit.transform.name.Contains("Octree"))
+                {
+                    Debug.DrawRay(transform.position, (transform.right + new Vector3(0,.25f,0)) * viewDistance, Color.blue);
+                    Rotate(new Vector3(hit.normal.x, hit.normal.y, hit.normal.z));
+                    turned = true; interacting = true;
+                }
+            }
+
+            //Left Ray
+            Ray rayLeft = new Ray(transform.position, (-transform.right + new Vector3(0, .25f, 0)));
+            if (Physics.Raycast(rayLeft, out hit, viewDistance) && !turned)
+            {
+                if (hit.transform.name.Contains("Octree"))
+                {
+                    Debug.DrawRay(transform.position, (-transform.right + new Vector3(0, .25f, 0)) * viewDistance, Color.yellow);
+                    Rotate(new Vector3(hit.normal.x, hit.normal.y, hit.normal.z));
+                    turned = true; interacting = true;
+                }
+            }
+
+
         }
     }
     #endregion
@@ -292,6 +364,8 @@ public class Fish : MonoBehaviour
         Collider[] hitColliders = Physics.OverlapSphere(transform.position, scaredDist);
         foreach (Collider c in hitColliders)
         {
+            if(c.transform.name.Contains(terrainName))
+                //print(c.transform.name);
             if (c.gameObject.GetComponent<AvoidObject>() != null)
             {
                 avoidDirection = -(c.gameObject.transform.position - transform.position);

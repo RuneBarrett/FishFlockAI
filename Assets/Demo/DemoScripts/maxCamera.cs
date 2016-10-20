@@ -16,6 +16,7 @@ public class maxCamera : MonoBehaviour
 	public int zoomRate = 40;
 	public float panSpeed = 0.3f;
 	public float zoomDampening = 5.0f;
+    public bool autoOrbit = true;
 	
 	private float xDeg = 0.0f;
 	private float yDeg = 0.0f;
@@ -58,6 +59,7 @@ public class maxCamera : MonoBehaviour
      */
 	void LateUpdate()
 	{
+
 		// If Control and Alt and Middle button? ZOOM!
 		if (Input.GetMouseButton(2) && Input.GetKey(KeyCode.LeftAlt) && Input.GetKey(KeyCode.LeftControl))
 		{
@@ -68,7 +70,6 @@ public class maxCamera : MonoBehaviour
 		{
 			xDeg += Input.GetAxis("Mouse X") * xSpeed * 0.02f;
 			yDeg -= Input.GetAxis("Mouse Y") * ySpeed * 0.02f;
-			
 			////////OrbitAngle
 			
 			//Clamp the vertical axis for the orbit
@@ -83,16 +84,19 @@ public class maxCamera : MonoBehaviour
 		// otherwise if middle mouse is selected, we pan by way of transforming the target in screenspace
 		else if (Input.GetMouseButton(2))
 		{
+            print("2");
 			//grab the rotation of the camera so we can move in a psuedo local XY space
 			target.rotation = transform.rotation;
 			target.Translate(Vector3.right * -Input.GetAxis("Mouse X") * panSpeed);
 			target.Translate(transform.up * -Input.GetAxis("Mouse Y") * panSpeed, Space.World);
-		}
-		
-		////////Orbit Position
-		
-		// affect the desired Zoom distance if we roll the scrollwheel
-		desiredDistance -= Input.GetAxis("Mouse ScrollWheel") * Time.deltaTime * zoomRate * Mathf.Abs(desiredDistance);
+        }
+
+
+
+        ////////Orbit Position
+
+        // affect the desired Zoom distance if we roll the scrollwheel
+        desiredDistance -= Input.GetAxis("Mouse ScrollWheel") * Time.deltaTime * zoomRate * Mathf.Abs(desiredDistance);
 		//clamp the zoom min/max
 		desiredDistance = Mathf.Clamp(desiredDistance, minDistance, maxDistance);
 		// For smoothing of the zoom, lerp distance
@@ -101,6 +105,8 @@ public class maxCamera : MonoBehaviour
 		// calculate position based on the new currentDistance
 		position = target.position - (rotation * Vector3.forward * currentDistance + targetOffset);
 		transform.position = position;
+
+
 	}
 	
 	private static float ClampAngle(float angle, float min, float max)
