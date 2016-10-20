@@ -51,6 +51,8 @@ public class Fish : MonoBehaviour
 
     public string terrainName = "Octree";   //Replace with the name (or part of it) of the terrain or terrain nodes you want to hit with raycasting. Can be done simpler with tags, but not when using a voxel terrain generated with Cubiquity. 
 
+    public string[] dontCollideWith;        //Strings with the names of objects you dont want fish to collide with. Other fish is one example since the rules and raycasts detrmine what to do when they get near. Glass sides are handled more efficiently by RotationSwitch() as another example, and should therefore not be included in CollisionDetection.
+     
     private enum States {flocking, resting, playing};
     States state = States.flocking;
     #endregion
@@ -152,11 +154,11 @@ public class Fish : MonoBehaviour
         }
 
         //If an avoidable object is nearby ..
-        /*if (AvoidObjectNearby())
+        if (AvoidObjectNearby())
         {
             Rotate(avoidDirection);
             CalculateSpeed(1f, true); // .. move away 
-        }*/
+        }
 
         //If a scary object is nearby ..
         if (ScaryObjectNearby())
@@ -166,13 +168,57 @@ public class Fish : MonoBehaviour
         }
 
         //Use raycasting to give the fish information on its surroundings
-        fishVision();
+        //fishVision();
 
         //If colliding with terrain
-        if (TerrainCollision())
+        /*if (TerrainCollision())
         {
             Rotate(avoidTerrainDirection);
             CalculateSpeed(1f, true);
+        }*/
+
+    }
+
+    void OnCollisionEnter(Collision col) {
+        foreach (ContactPoint contact in col.contacts)
+        {
+            bool collide = true;
+            foreach (string dontCol in dontCollideWith) {
+                if (contact.otherCollider.transform.name.Contains(dontCol))
+                    collide = false;
+            }
+
+            if (collide) {
+                //print(contact.otherCollider.transform.name);
+                Debug.DrawRay(contact.point, contact.normal, Color.green, 2f);
+                avoidTerrainDirection = contact.normal*5;
+                Rotate(avoidTerrainDirection);
+                CalculateSpeed(1f, true);
+
+            }
+        }
+    }
+
+    void OnCollisionStay(Collision col)
+    {
+        foreach (ContactPoint contact in col.contacts)
+        {
+            bool collide = true;
+            foreach (string dontCol in dontCollideWith)
+            {
+                if (contact.otherCollider.transform.name.Contains(dontCol))
+                    collide = false;
+            }
+
+            if (collide)
+            {
+                //print(contact.otherCollider.transform.name);
+                Debug.DrawRay(contact.point, contact.normal, Color.red, 3f);
+                avoidTerrainDirection = contact.normal * 5;
+                Rotate(avoidTerrainDirection);
+                CalculateSpeed(1f, true);
+
+            }
         }
     }
 
@@ -181,12 +227,14 @@ public class Fish : MonoBehaviour
         //Collision safety check
         
         avoidTerrainDirection = Vector3.zero;
-        Collider[] hitColliders = Physics.OverlapSphere(transform.position, 1f);
+        Collider[] hitColliders = Physics.OverlapSphere(transform.position, .2f);
         foreach (Collider c in hitColliders)
         {
-            if (c.transform.name.Contains(terrainName))
+            if (!c.transform.name.Contains("Sardine") && !c.transform.name.Contains("Bone") && //HARDCODED!!!!
+                !c.transform.name.Contains("Glass") && !c.transform.name.Contains("Shark") &&
+                !c.transform.name.Contains("Bush") && !c.transform.name.Contains("Goal")) //c.transform.name.Contains(terrainName)
             {
-                //print("Collision");
+                //print(c.transform.name);
                 avoidTerrainDirection = -(c.gameObject.transform.position - transform.position);
                 return true;
             }

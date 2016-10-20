@@ -218,6 +218,7 @@ GameObject:
   - 95: {fileID: 95000014171622234}
   - 54: {fileID: 54000010528687834}
   - 114: {fileID: 114000012060530930}
+  - 64: {fileID: 64000012972618482}
   m_Layer: 0
   m_Name: SimpleSardine
   m_TagString: Untagged
@@ -1100,10 +1101,22 @@ Rigidbody:
   m_Drag: 5
   m_AngularDrag: 2
   m_UseGravity: 0
-  m_IsKinematic: 1
+  m_IsKinematic: 0
   m_Interpolate: 0
-  m_Constraints: 0
+  m_Constraints: 126
   m_CollisionDetection: 0
+--- !u!64 &64000012972618482
+MeshCollider:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1000011440699570}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Convex: 0
+  m_Mesh: {fileID: 0}
 --- !u!95 &95000014171622234
 Animator:
   serializedVersion: 3
@@ -1145,8 +1158,12 @@ MonoBehaviour:
   aloneSpeed: 3
   turnTimer: 1.5
   interactTimer: 0.2
-  viewDistance: 1
+  viewDistance: 2.5
   terrainName: Octree
+  dontCollideWith:
+  - Glass
+  - Bone
+  - Bush
 --- !u!136 &136000013638050360
 CapsuleCollider:
   m_ObjectHideFlags: 1

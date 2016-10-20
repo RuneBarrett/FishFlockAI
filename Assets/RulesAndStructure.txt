@@ -15,9 +15,8 @@ State 1: Flocking (The usual state for a fish)
 		a. A fish should always stay within the given area. 
 		b. When in flocking state, but not currently in a group (moving alone), move faster to increase the chance of meeting a group.
 		c. When flocking the group should not swim to much along the edges of the area, since this seems unnatural.
-		d. When approaching a surface and the group is smaller than a set amount, sometimes alter direction to move along the surface.
-		e. Avoid swimming into neutral objects such as terrain. 
-		f. Sometimes when looking straight at another fish, switch to its group
+		d. When approaching a surface, sometimes alter direction to move along the surface.
+		e. Sometimes when looking straight at another fish, switch to its group
 		
 
 State 2: Resting (Lying still, or moving slowly) (Entered from: Flocking) (NOT YET IMPLEMENTED)
