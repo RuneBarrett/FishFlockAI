@@ -13,17 +13,21 @@ public class Fish : MonoBehaviour
 
     private float initSpeed;                //Each members original speed. Not changing. 
     private float initTurnTimer;            //Used for resetting the turntimer
-    private float initInteractTimer;
+    //private float initInteractTimer;
     //private Vector3 averageHeading;
     //private Vector3 averagePosition;
     private Vector3 scaredDirection;        //Stores the direction to move in when scared
     private Vector3 avoidDirection;         //Stores the direction to move in when avoiding
     private Vector3 avoidTerrainDirection;
+    private Vector3 headPos;
 
     private GameObject goalPos;             //The overall position the member is moving towards
 
     private bool turning = false;           //Determines whether the fish recently turned around from one of the sides
-    private bool interacting = false;        //Determines whether the fish recently interacted with a static object like terrain, or another fish
+    //private bool interacting = false;       //Determines whether the fish recently interacted with a static object like terrain, or another fish
+
+    private enum States { flocking, resting, playing };
+    private States state = States.flocking;
 
     /* Public Variables Description
     All of the below public varibles, and the similar fields in GlobalFlock.cs, change the behavior of the members. Be aware that many of them have 
@@ -46,25 +50,26 @@ public class Fish : MonoBehaviour
     public float aloneSpeed = 1.5f;         //Move faster while alone
 
     public float turnTimer = 2f;
-    public float interactTimer = .2f;
+    //public float interactTimer = .2f;
     public float viewDistance = 2f;
 
-    public string terrainName = "Octree";   //Replace with the name (or part of it) of the terrain or terrain nodes you want to hit with raycasting. Can be done simpler with tags, but not when using a voxel terrain generated with Cubiquity. 
 
     public string[] dontCollideWith;        //Strings with the names of objects you dont want fish to collide with. Other fish is one example since the rules and raycasts detrmine what to do when they get near. Glass sides are handled more efficiently by RotationSwitch() as another example, and should therefore not be included in CollisionDetection.
-     
-    private enum States {flocking, resting, playing};
-    States state = States.flocking;
+    //public string[] visibleObjects;         //Names of objects that will be processed by the fishVision function.
+    public string terrainNodeName = "OctreeNode";   //(Not needed with regular terrains, use tag instead) Replace with the name (or part of it) of the terrain or terrain nodes you want to hit with raycasting. Can be done simpler with tags, but not when using a voxel terrain generated with Cubiquity. 
+    public Transform head;
+
     #endregion
 
     void Start()
-    {       
+    {
         utilities = new FlockAIUtilities();
 
         //volume = GameObject.FindGameObjectWithTag("Terrain").GetComponent<TerrainVolume>();
 
         initSpeed = speed;
         initTurnTimer = turnTimer;
+        //initInteractTimer = interactTimer;
 
         //Set the speed to a value slightly higher or lower, so the fish will move with varying speeds.
         speed = CalculateSpeed(1f, true);
@@ -114,7 +119,6 @@ public class Fish : MonoBehaviour
 
     }
 
-
     #region Pre & Post Updates
     private void PreStateUpdate() //This will only happen if it is not overwritten by the current state, or PostAllStatesUpdate()
     {
@@ -128,7 +132,7 @@ public class Fish : MonoBehaviour
             }
         }
 
-        if (interacting)
+        /*if (interacting)
         {
             interactTimer -= Time.deltaTime;
             if (interactTimer <= 0)
@@ -136,7 +140,7 @@ public class Fish : MonoBehaviour
                 interacting = false;
                 interactTimer = initInteractTimer;
             }
-        }
+        }*/
 
 
     }
@@ -168,7 +172,7 @@ public class Fish : MonoBehaviour
         }
 
         //Use raycasting to give the fish information on its surroundings
-        //fishVision();
+        fishVision();
 
         //If colliding with terrain
         /*if (TerrainCollision())
@@ -179,27 +183,20 @@ public class Fish : MonoBehaviour
 
     }
 
-    void OnCollisionEnter(Collision col) {
-        foreach (ContactPoint contact in col.contacts)
-        {
-            bool collide = true;
-            foreach (string dontCol in dontCollideWith) {
-                if (contact.otherCollider.transform.name.Contains(dontCol))
-                    collide = false;
-            }
-
-            if (collide) {
-                //print(contact.otherCollider.transform.name);
-                Debug.DrawRay(contact.point, contact.normal, Color.green, 2f);
-                avoidTerrainDirection = contact.normal*5;
-                Rotate(avoidTerrainDirection);
-                CalculateSpeed(1f, true);
-
-            }
-        }
+    void OnCollisionEnter(Collision col)
+    {
+        //if(!interacting)
+            CollisionReaction(col, Color.green);
     }
 
+
     void OnCollisionStay(Collision col)
+    {
+        //if (!interacting)
+            CollisionReaction(col, Color.red);
+    }
+
+    private void CollisionReaction(Collision col, Color c)
     {
         foreach (ContactPoint contact in col.contacts)
         {
@@ -212,15 +209,17 @@ public class Fish : MonoBehaviour
 
             if (collide)
             {
+                //interacting = true;
                 //print(contact.otherCollider.transform.name);
-                Debug.DrawRay(contact.point, contact.normal, Color.red, 3f);
-                avoidTerrainDirection = contact.normal * 5;
+                Debug.DrawRay(contact.point, contact.normal, Color.green, .3f);
+                avoidTerrainDirection = contact.normal*.5f;
                 Rotate(avoidTerrainDirection);
                 CalculateSpeed(1f, true);
 
             }
         }
     }
+
 
     private bool TerrainCollision()
     {
@@ -230,9 +229,9 @@ public class Fish : MonoBehaviour
         Collider[] hitColliders = Physics.OverlapSphere(transform.position, .2f);
         foreach (Collider c in hitColliders)
         {
-            if (!c.transform.name.Contains("Sardine") && !c.transform.name.Contains("Bone") && //HARDCODED!!!!
+            if (!c.transform.name.Contains("Sardine") && !c.transform.name.Contains("Bone") && 
                 !c.transform.name.Contains("Glass") && !c.transform.name.Contains("Shark") &&
-                !c.transform.name.Contains("Bush") && !c.transform.name.Contains("Goal")) //c.transform.name.Contains(terrainName)
+                !c.transform.name.Contains("Bush") && !c.transform.name.Contains("Goal"))
             {
                 //print(c.transform.name);
                 avoidTerrainDirection = -(c.gameObject.transform.position - transform.position);
@@ -248,85 +247,89 @@ public class Fish : MonoBehaviour
     private void fishVision()
     {
         RaycastHit hit;
-        bool turned = false;
-        if (!interacting)
+        headPos = head.transform.position;
+        //bool turned = false;
+
+        //Forward Ray
+        //Quaternion rot = transform.rotation;
+        Ray rayForward = new Ray(headPos, transform.forward);
+        if (Physics.Raycast(rayForward, out hit, viewDistance))
         {
-            //Forward Ray
-            Quaternion rot = transform.rotation;
-            Ray rayForward = new Ray(transform.position+new Vector3(0,1,0), transform.forward);
-            if (Physics.Raycast(rayForward, out hit, viewDistance*.7f))
+
+            //Rotate to match the x and y eulerAngles of the part of the terrain hit.
+            if (hit.transform.name.Contains(terrainNodeName) || hit.transform.tag.Equals("Prop"))
             {
-                Debug.DrawRay(transform.position, transform.forward * viewDistance*1.5f, Color.green);
-
-                //Rotate to match the eulerAngles of the part of the terrain hit.
-                if (hit.transform.name.Contains("Octree")) 
-                {
-                    //Rotate(new Vector3(hit.normal.x, hit.normal.y, 0)*1.5f);//hit.normal.x, hit.normal.z
-                    turned = true; interacting = true;
-                    transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(-transform.forward), rotationSpeed * Time.deltaTime);
-                }
-
-                //If the hit result is another fish in front of this one and it's in another group, sometimes switch to that group
-                if (hit.transform.name.Contains("SimpleSardine"))
-                {
-                    if (Random.Range(0, 50) < 1f && hit.transform.GetComponent<Fish>().GetGoal() != goalPos)
-                    {
-                        goalPos = hit.transform.GetComponent<Fish>().GetGoal();
-                    }
-                }
-
+                Debug.DrawRay(headPos, transform.forward * viewDistance, Color.cyan, 2f);
+                //print(hit.normal.x + " " +transform.position.normalized.x);
+                //print(hit.transform.tag + " or "+ hit.transform.name);
+                Rotate(new Vector3(hit.normal.x, hit.normal.y, 0));//hit.normal.x, hit.normal.z
+                                                                   //turned = true; interacting = true;
+                                                                   //Stransform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(-transform.forward), rotationSpeed * Time.deltaTime);
             }
 
-            //Up Ray
-            Ray rayUp = new Ray(transform.position, transform.up);
-            if (Physics.Raycast(rayUp, out hit, viewDistance) && !turned)
+            //If the hit result is another fish in front of this one and it's in another group, sometimes switch to that group
+            if (hit.transform.tag.Equals("FlockEntity"))
             {
-                if (hit.transform.name.Contains("Octree"))
+                Debug.DrawRay(transform.position, transform.forward * viewDistance * 1.5f, Color.cyan, .3f);
+                if (Random.Range(0, 20) < 1f && hit.transform.GetComponent<Fish>().GetGoal() != goalPos && transform.parent == hit.transform.parent)
                 {
-                    Debug.DrawRay(transform.position, transform.up * viewDistance, Color.cyan);
-                    Rotate(new Vector3(hit.normal.x, hit.normal.y, 0)*2);
-                    turned = true; interacting = true;
+                    goalPos = hit.transform.GetComponent<Fish>().GetGoal();
                 }
             }
-
-            //Down Ray
-            Ray rayDown = new Ray(transform.position, -transform.up);
-            if (Physics.Raycast(rayDown, out hit, viewDistance) && !turned)
-            {
-                if (hit.transform.name.Contains("Octree"))
-                {
-                    Debug.DrawRay(transform.position, -transform.up * viewDistance, Color.red);
-                    Rotate(new Vector3(hit.normal.x, hit.normal.y,0)*.65f);
-                    turned = true; interacting = true;
-                }
-            }
-
-            //Right Ray
-            Ray rayRight = new Ray(transform.position, (transform.right + new Vector3(0, .25f, 0)));
-            if (Physics.Raycast(rayRight, out hit, viewDistance) && !turned)
-            {
-                if (hit.transform.name.Contains("Octree"))
-                {
-                    Debug.DrawRay(transform.position, (transform.right + new Vector3(0,.25f,0)) * viewDistance, Color.blue);
-                    Rotate(new Vector3(hit.normal.x, hit.normal.y, hit.normal.z));
-                    turned = true; interacting = true;
-                }
-            }
-
-            //Left Ray
-            Ray rayLeft = new Ray(transform.position, (-transform.right + new Vector3(0, .25f, 0)));
-            if (Physics.Raycast(rayLeft, out hit, viewDistance) && !turned)
-            {
-                if (hit.transform.name.Contains("Octree"))
-                {
-                    Debug.DrawRay(transform.position, (-transform.right + new Vector3(0, .25f, 0)) * viewDistance, Color.yellow);
-                    Rotate(new Vector3(hit.normal.x, hit.normal.y, hit.normal.z));
-                    turned = true; interacting = true;
-                }
-            }
-
 
         }
+
+        //Up Ray
+        /*
+        Ray rayUp = new Ray(transform.position, transform.up);
+        if (Physics.Raycast(rayUp, out hit, viewDistance) && !turned)
+        {
+            if (hit.transform.name.Contains("Octree"))
+            {
+                Debug.DrawRay(transform.position, transform.up * viewDistance, Color.cyan);
+                Rotate(new Vector3(hit.normal.x, hit.normal.y, 0)*2);
+                turned = true; interacting = true;
+            }
+        }*/
+        Vector3 rayStartPos = new Vector3(0, 0, 0);
+        //Down Ray
+        Ray rayDown = new Ray(headPos, -transform.up);
+        if (Physics.Raycast(rayDown, out hit, viewDistance))
+        {
+            if (hit.transform.name.Contains(terrainNodeName) || hit.transform.tag.Equals("Prop"))
+            {
+                Debug.DrawRay(headPos, -transform.up * viewDistance, Color.red, .3f);
+                Rotate(new Vector3(0, hit.normal.y, 0));//*.65f
+                                                        //turned = true; interacting = true;
+            }
+        }
+
+        //Right Ray
+        Ray rayRight = new Ray(headPos, transform.right);
+        if (Physics.Raycast(rayRight, out hit, viewDistance))
+        {
+            if (hit.transform.name.Contains(terrainNodeName) || hit.transform.tag.Equals("Prop"))
+            {
+                Debug.DrawRay(transform.position, (transform.right) * viewDistance, Color.blue);
+                Rotate(new Vector3(hit.normal.x, hit.normal.y, hit.normal.z));
+                //turned = true; interacting = true;
+            }
+        }
+
+        //Left Ray
+        Ray rayLeft = new Ray(transform.position, -transform.right);
+        if (Physics.Raycast(rayLeft, out hit, viewDistance))
+        {
+            if (hit.transform.name.Contains(terrainNodeName) || hit.transform.tag.Equals("Prop"))
+            {
+                Debug.DrawRay(transform.position, -transform.right * viewDistance, Color.blue);
+                Rotate(new Vector3(hit.normal.x, hit.normal.y, hit.normal.z));
+                //turned = true; interacting = true;
+            }
+        }
+
+
+
     }
     #endregion
 
@@ -412,7 +415,7 @@ public class Fish : MonoBehaviour
         Collider[] hitColliders = Physics.OverlapSphere(transform.position, scaredDist);
         foreach (Collider c in hitColliders)
         {
-            if(c.transform.name.Contains(terrainName))
+            //if(c.transform.name.Contains(terrainName))
                 //print(c.transform.name);
             if (c.gameObject.GetComponent<AvoidObject>() != null)
             {

@@ -70,6 +70,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Demo\DemoScripts\CausticsMov.cs" />
+    <Compile Include="Assets\Demo\DemoScripts\CubiqTerrainNodeTagger.cs" />
     <Compile Include="Assets\Demo\DemoScripts\maxCamera.cs" />
     <Compile Include="Assets\Demo\DemoTools\Cubiquity\Examples\CreatingVolumesFromCode\CreateVoxelDatabase\CreateVoxelDatabase.cs" />
     <Compile Include="Assets\Demo\DemoTools\Cubiquity\Examples\CreatingVolumesFromCode\MazeFromImage\ColoredCubeMazeFromImage.cs" />

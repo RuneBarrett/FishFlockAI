@@ -218,10 +218,10 @@ GameObject:
   - 95: {fileID: 95000014171622234}
   - 54: {fileID: 54000010528687834}
   - 114: {fileID: 114000012060530930}
-  - 64: {fileID: 64000012972618482}
+  - 64: {fileID: 64000014223978530}
   m_Layer: 0
   m_Name: SimpleSardine
-  m_TagString: Untagged
+  m_TagString: Fish
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -511,6 +511,23 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!1 &1000013585554242
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  serializedVersion: 4
+  m_Component:
+  - 4: {fileID: 4000013098861330}
+  - 33: {fileID: 33000011170967690}
+  - 23: {fileID: 23000011073051986}
+  m_Layer: 0
+  m_Name: Head
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
 --- !u!1 &1000013837891308
 GameObject:
   m_ObjectHideFlags: 1
@@ -651,11 +668,12 @@ Transform:
   m_GameObject: {fileID: 1000011440699570}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 2.3, y: 2.3, z: 2.3}
+  m_LocalScale: {x: 2, y: 2, z: 2}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_Children:
   - {fileID: 4000013254132802}
   - {fileID: 4000013037410338}
+  - {fileID: 4000013098861330}
   m_Father: {fileID: 0}
   m_RootOrder: 0
 --- !u!4 &4000011097875116
@@ -915,6 +933,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 4000011033073758}
   m_RootOrder: 1
+--- !u!4 &4000013098861330
+Transform:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1000013585554242}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.067, z: 0.18}
+  m_LocalScale: {x: 0.05, y: 0.05, z: 0.05}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_Children: []
+  m_Father: {fileID: 4000011033073758}
+  m_RootOrder: 2
 --- !u!4 &4000013246507340
 Transform:
   m_ObjectHideFlags: 1
@@ -1090,6 +1121,42 @@ Transform:
   m_Children: []
   m_Father: {fileID: 4000013837840428}
   m_RootOrder: 1
+--- !u!23 &23000011073051986
+MeshRenderer:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1000013585554242}
+  m_Enabled: 0
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_Materials:
+  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  m_SubsetIndices: 
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_PreserveUVs: 1
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_SelectedWireframeHidden: 0
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingOrder: 0
+--- !u!33 &33000011170967690
+MeshFilter:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1000013585554242}
+  m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!54 &54000010528687834
 Rigidbody:
   m_ObjectHideFlags: 1
@@ -1105,7 +1172,7 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 126
   m_CollisionDetection: 0
---- !u!64 &64000012972618482
+--- !u!64 &64000014223978530
 MeshCollider:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
@@ -1148,22 +1215,22 @@ MonoBehaviour:
   speed: 2.5
   speedModifyer: 0.6
   rotationSpeed: 2.3
-  applyRulesFactor: 12
-  neighborRange: 6
+  applyRulesFactor: 8
+  neighborRange: 4
   tooCloseRange: 2
   groupSpeedReset: 0.85
-  scaredDist: 6.5
+  scaredDist: 4
   fleeSpeed: 4
   avoidDist: 0.8
-  aloneSpeed: 3
+  aloneSpeed: 2.5
   turnTimer: 1.5
-  interactTimer: 0.2
-  viewDistance: 2.5
-  terrainName: Octree
+  viewDistance: 2
   dontCollideWith:
   - Glass
   - Bone
   - Bush
+  terrainNodeName: OctreeNode
+  head: {fileID: 4000013098861330}
 --- !u!136 &136000013638050360
 CapsuleCollider:
   m_ObjectHideFlags: 1
