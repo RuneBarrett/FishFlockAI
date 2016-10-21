@@ -69,6 +69,14 @@ public class GlobalFlock : MonoBehaviour
                 goal.transform.position = utilities.setRandomPosInArea(SpawnArea, .85f);
             }
         }
+
+        /*//DEBUG
+        string p = "";
+        foreach (GameObject f in allFish) {
+            p += (int)f.GetComponent<Fish>().exhausted + " ";
+            
+        }
+        print(p);*/
     }
 
     public Vector3 setRandomPosShortcut(float mod)
@@ -76,12 +84,24 @@ public class GlobalFlock : MonoBehaviour
         return utilities.setRandomPosInArea(SpawnArea, mod);
     }
 
-   public GameObject getRandomRestingPosInRange(Vector3 pos, float detectDistance) {
-        /*restingAreas = RandomizeArray(restingAreas);
+   public Vector3 getRandomRestingPosInRange(Vector3 pos, float detectDistance) {
+        //restingAreas = RandomizeArray(restingAreas);
+        GameObject newPosGO = restingAreas[0];
+        bool found = false;
         foreach (GameObject area in restingAreas)
-            if (Vector3.Distance(pos, area.transform.position) < detectDistance)
-                return area.transform.position; //+utilities.setRandomPosInArea(area,1f)*/
-        return restingAreas[0];
+        {
+            if (Vector3.Distance(pos, area.transform.position) < detectDistance &&
+               Vector3.Distance(area.transform.position, pos) < Vector3.Distance(newPosGO.transform.position, pos))
+            {
+                newPosGO = area;
+                found = true;
+            }
+        }
+        //return area; //+utilities.setRandomPosInArea(area,1f)*/
+        if (found)
+            return newPosGO.transform.position;
+        else
+            return pos;
     }
 
     static GameObject[] RandomizeArray(GameObject[] arr)

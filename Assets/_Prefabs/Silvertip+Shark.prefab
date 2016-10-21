@@ -406,7 +406,7 @@ MonoBehaviour:
   - Bone
   terrainNodeName: OctreeNode
   head: {fileID: 4000013439424420}
-  exhaustionLimit: 100
+  exhaustionLimit: 200
   canRest: 0
 --- !u!114 &114000012975572034
 MonoBehaviour:

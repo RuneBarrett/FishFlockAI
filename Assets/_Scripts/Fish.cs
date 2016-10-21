@@ -13,6 +13,7 @@ public class Fish : MonoBehaviour
 
     private float initSpeed;                //Each members original speed. Not changing. 
     private float initTurnTimer;            //Used for resetting the turntimer
+    private float initStateChangeTimer;
     //private float initInteractTimer;
     //private Vector3 averageHeading;
     //private Vector3 averagePosition;
@@ -45,6 +46,8 @@ public class Fish : MonoBehaviour
     public float rotationSpeed = 2f;        //How fast the member turns
     public float applyRulesFactor = 5f;     //Apply the 3 basic rules only one in <applyRulesFactor> times. This allows fish to sometimes swim away from the group, etc.
     public float neighborRange = 5f;        //When is a member considered a neighbor, and is thus eligible for grouping.
+    public float restingNeighborDistance = 5f;
+
     public float tooCloseRange = 1f;        //When is another member too close.
     public float groupSpeedReset = .7f;     //The approximate speed a group will start with in the beginning of a frame. The avarage speed is then calculated including this number.
 
@@ -57,6 +60,7 @@ public class Fish : MonoBehaviour
     private float restDownSpeed = 0;
 
     public float turnTimer = 2f;
+    public float stateChangeTimer = 3f;
     //public float interactTimer = .2f;
     public float viewDistance = 2f;
 
@@ -69,7 +73,11 @@ public class Fish : MonoBehaviour
     public bool canRest;
     private Vector3 restPosition;
     private bool grounded;
-    private float restInRange;
+    private float restInRangeTimer;
+    private float neighborInRangeTimer;
+    private Vector3 restGoalPos;
+
+
 
     #endregion
 
@@ -81,6 +89,7 @@ public class Fish : MonoBehaviour
 
         initSpeed = speed;
         initTurnTimer = turnTimer;
+        initStateChangeTimer = stateChangeTimer;
         //initInteractTimer = interactTimer;
 
         //Set the speed to a value slightly higher or lower, so the fish will move with varying speeds.
@@ -89,7 +98,7 @@ public class Fish : MonoBehaviour
         //Choose a random initial goal.
         goalPos = flock.getGoalPos();
 
-        exhausted = Random.Range(0, 80);
+        exhausted = Random.Range(60, 90);
     }
 
     void Update()
@@ -153,39 +162,14 @@ public class Fish : MonoBehaviour
     #region Pre & Post Updates
     private void PreStateUpdate()
     {
-        UpdateTimers();
+        if (restInRangeTimer > 0)
+            restInRangeTimer -= Time.deltaTime;
+        if (stateChangeTimer > 0)
+            stateChangeTimer -= Time.deltaTime;
 
-        /*if(state != States.resting)
-            if (exhausted >= exhaustionLimit * 0.8f)
-            {
-                if (grounded) {
-                    //print("can rest");
-                    if(canRest)
-                        state = States.resting;
-                }
-
-                /*Vector3 thisPos = transform.position;
-                GameObject restPos = flock.getRandomRestingPosInRange(transform.position, 20f);
-
-                if (restPos.transform.position != thisPos)
-                {
-                    print("rest state");
-                    state = States.resting;
-                    restPosition = restPos.transform.position;
-                }*/
-
-            //}
-
-
-    }
-
-    private void UpdateTimers()
-    {
-        if (restInRange > 0)
-            restInRange -= Time.deltaTime;
         if (exhausted <= exhaustionLimit && state != States.resting)
         {
-            exhausted += Time.deltaTime * 0.5f;
+            exhausted += Time.deltaTime;
         }
 
         if (turning)
@@ -207,6 +191,29 @@ public class Fish : MonoBehaviour
                 interactTimer = initInteractTimer;
             }
         }*/
+
+        /*if(state != States.resting)
+            if (exhausted >= exhaustionLimit * 0.8f)
+            {
+                if (grounded) {
+                    //print("can rest");
+                    if(canRest)
+                        state = States.resting;
+                }
+
+                /*Vector3 thisPos = transform.position;
+                GameObject restPos = flock.getRandomRestingPosInRange(transform.position, 20f);
+
+                if (restPos.transform.position != thisPos)
+                {
+                    print("rest state");
+                    state = States.resting;
+                    restPosition = restPos.transform.position;
+                }*/
+
+        //}
+
+
     }
 
     private void PostStateUpdate() //This will owerwrite changes made by the current state.
@@ -238,13 +245,79 @@ public class Fish : MonoBehaviour
         //Use raycasting to give the fish information on its surroundings
         fishVision();
 
-        //If colliding with terrain
-        /*if (TerrainCollision())
-        {
-            Rotate(avoidTerrainDirection);
-            CalculateSpeed(1f, true);
-        }*/
+        SwitchToRestStateIfExhausted();
+    }
 
+    private void SwitchToRestStateIfExhausted()
+    {   //If exhausted or resting
+        if ((exhausted >= exhaustionLimit * .85f || state == States.resting) && canRest)
+        {
+            
+            bool hitSomething = false;
+            float restGroundDistance = 1.7f;
+            RaycastHit hit;
+
+            Ray rayRestUp = new Ray(headPos, Vector3.up);
+            if (Physics.Raycast(rayRestUp, out hit, viewDistance * restGroundDistance))
+            {
+                if (hit.transform.name.Contains(terrainNodeName) || hit.transform.tag.Equals("Prop"))
+                {
+                    Debug.DrawRay(headPos, Vector3.up * viewDistance * restGroundDistance, Color.black, 2f);
+                    hitSomething = true;
+                }
+            }
+
+            Ray rayRestDown = new Ray(headPos, -Vector3.up);
+            if (Physics.Raycast(rayRestDown, out hit, viewDistance * restGroundDistance))
+            {
+                if (hit.transform.name.Contains(terrainNodeName) || hit.transform.tag.Equals("Prop"))
+                {
+                    Debug.DrawRay(headPos, -Vector3.up * viewDistance * restGroundDistance, Color.black, 2f);
+                    hitSomething = true;
+                }
+            }
+
+
+
+            if (hitSomething)
+            {
+                //If the fish needs to rest, switch to resting state
+                if (state != States.resting && stateChangeTimer <= 0)
+                {
+                    state = States.resting;
+                    stateChangeTimer = initStateChangeTimer;
+                }
+                if (restInRangeTimer < 3f)
+                    restInRangeTimer = 3f;
+
+                restGoalPos = flock.getRandomRestingPosInRange(transform.position, 7f) - transform.position;
+
+                //If ground is near move towards it
+                bool rotate = false;
+                Vector3 dir = Vector3.zero;
+
+                if (restGoalPos != transform.position) {
+                    dir += restGoalPos;
+                    rotate = true;
+                }
+
+                if (Vector3.Distance(transform.position, hit.point) >= 2 && hit.point.y < transform.position.y)
+                {
+                    dir += new Vector3(0, -.5f, 0);
+                    rotate = true;          
+                }
+                if (Vector3.Distance(transform.position, hit.point) >= 2 && hit.point.y > transform.position.y)
+                {
+                    dir += new Vector3(0, .5f, 0);
+                    rotate = true;
+                }
+
+
+                if (rotate)
+                    Rotate(dir * Time.deltaTime);
+
+            }
+        }
     }
 
 
@@ -377,29 +450,6 @@ public class Fish : MonoBehaviour
                 //turned = true; interacting = true;
             }
         }
-
-        //Rest Down Ray
-        Ray rayRestDown = new Ray(headPos, -Vector3.up);
-        if (exhausted >= exhaustionLimit*.6f || state == States.resting)//If exhausted or resting
-            if (Physics.Raycast(rayRestDown, out hit, viewDistance * 5f))
-            {
-                if (hit.transform.name.Contains(terrainNodeName) || hit.transform.tag.Equals("Prop"))
-                {
-                    if (state != States.resting)
-                        state = States.resting;
-                    if(restInRange < 3f)
-                        restInRange = 3f;
-
-                    //grounded = true; //If the fish needs to rest, switch to resting state
-                    Debug.DrawRay(headPos, -Vector3.up * viewDistance * 5f, Color.black, 2f);
-                    if (Vector3.Distance(transform.position, hit.point) > 3) {
-                        Rotate(-Vector3.up*Time.deltaTime);
-                    }
-                        
-                    //downSurfaceAngle = new Vector3(hit.normal.x, hit.normal.y, hit.normal.z);
-                    //Rotate(new Vector3(0, hit.normal.y, 0));//*.65f                                                      
-                }
-            }
     }
     #endregion
 
@@ -421,7 +471,7 @@ public class Fish : MonoBehaviour
 
             foreach (GameObject anotherFish in allFish)
             {
-                if (anotherFish != gameObject)//If not this fish
+                if (anotherFish != gameObject && anotherFish.GetComponent<Fish>().state == States.flocking)//If not this fish and the fish is in flocking state
                 {
                     anotherPos = anotherFish.transform.position;
                     dist = Vector3.Distance(thisPos, anotherPos);
@@ -474,20 +524,70 @@ public class Fish : MonoBehaviour
 
     private void RestingUpdate()
     {
-        Debug.DrawRay(transform.position, Vector3.up, Color.magenta, .3f);
-
         //Return to flocking if rested
-        exhausted -= Time.deltaTime;
-        if (exhausted <= exhaustionLimit * 0.1f)
+        exhausted -= Time.deltaTime * 5;
+        if (exhausted <= exhaustionLimit * 0.01f)
         {
-            print("return to flock");
+            //print("return to flock");
             state = States.flocking;
         }
 
-        if(restInRange <= 0)
-            state = States.flocking;
-        speed = utilities.slightlyRandomizeValue(initSpeed, .8f)*.3f; 
+        //Dont rest if alone too long.
+        neighborInRangeTimer -= Time.deltaTime;
 
+        //Apply rest grouping rules
+        if (Random.Range(0, applyRulesFactor*2) < 1)
+        {
+            Debug.DrawRay(transform.position, Vector3.up, Color.magenta, .3f);
+            speed = utilities.slightlyRandomizeValue(initSpeed, .8f) * .4f;//!!dont do every frame
+
+            //Resting group behavior
+            ArrayList restingGroup = new ArrayList();
+            Vector3 avoidFishDir = Vector3.zero;
+            foreach (GameObject otherFish in allFish)
+            {
+                if (otherFish.GetComponent<Fish>().state == States.resting && otherFish != gameObject)
+                {
+                    float dist = Vector3.Distance(transform.position, otherFish.transform.position);
+                    if (dist < restingNeighborDistance)
+                    {
+                        restingGroup.Add(otherFish);
+                        if (neighborInRangeTimer < 3f)
+                            neighborInRangeTimer = 3;
+
+                        if (dist < tooCloseRange) // If the other fish gets too close however, turn away from it.
+                        {
+                            avoidFishDir = avoidFishDir + (transform.position - otherFish.transform.position);
+                        }
+                    }
+                }
+            }
+
+            Vector3 groupCenter = Vector3.zero;
+            int size = 0;
+            foreach (GameObject restGroupMember in restingGroup)
+            {
+                groupCenter += restGroupMember.transform.position;
+                size++;
+            }
+            if (restGoalPos != transform.position)
+                groupCenter = groupCenter / size + restGoalPos - transform.position;
+            else
+                groupCenter = groupCenter / size - transform.position;
+
+            Debug.DrawRay(transform.position, groupCenter, Color.yellow, .3f);
+            //Debug.DrawRay(transform.position, groupCenter, Color.yellow, .3f);
+
+            //rotate towards groupCenter and avoidFishDir
+            Rotate(groupCenter + avoidFishDir * 1.5f);
+
+        }
+
+        if (restInRangeTimer <= 0.01 || neighborInRangeTimer <= 0.01 && stateChangeTimer <= 0.01)
+        {
+            state = States.flocking;
+            stateChangeTimer = initStateChangeTimer;
+        }
     }
     #endregion
 
