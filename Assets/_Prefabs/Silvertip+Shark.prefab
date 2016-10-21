@@ -388,9 +388,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ff26de87c9daa954c961b50e5a32e00a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 2.8
+  speed: 2
   speedModifyer: 0.5
-  rotationSpeed: 1
+  rotationSpeed: 0.7
   applyRulesFactor: 4
   neighborRange: 10
   tooCloseRange: 14
@@ -400,12 +400,14 @@ MonoBehaviour:
   avoidDist: 0.5
   aloneSpeed: 1.5
   turnTimer: 3
-  viewDistance: 6
+  viewDistance: 2
   dontCollideWith:
   - Glass
   - Bone
   terrainNodeName: OctreeNode
   head: {fileID: 4000013439424420}
+  exhaustionLimit: 100
+  canRest: 0
 --- !u!114 &114000012975572034
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -426,10 +428,10 @@ CapsuleCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
-  m_Radius: 0.82
-  m_Height: 7.5
+  m_Radius: 0.67
+  m_Height: 6.37
   m_Direction: 1
-  m_Center: {x: 0, y: 1.04, z: 0}
+  m_Center: {x: 0, y: 1.01, z: 0}
 --- !u!136 &136000014108972328
 CapsuleCollider:
   m_ObjectHideFlags: 1
@@ -440,7 +442,7 @@ CapsuleCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   m_Radius: 0.57
-  m_Height: 5.94
+  m_Height: 5.58
   m_Direction: 2
   m_Center: {x: 0, y: 0, z: 1.14}
 --- !u!137 &137000012921283666

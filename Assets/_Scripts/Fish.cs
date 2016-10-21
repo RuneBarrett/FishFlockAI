@@ -29,6 +29,11 @@ public class Fish : MonoBehaviour
     private enum States { flocking, resting, playing };
     private States state = States.flocking;
 
+    private float exhausted;
+
+    Vector3 downSurfaceAngle;
+
+
     /* Public Variables Description
     All of the below public varibles, and the similar fields in GlobalFlock.cs, change the behavior of the members. Be aware that many of them have 
     conseqenses on the effect of other variables as well when changed. As an example, changing the amount of members in a given area without also changing 
@@ -49,15 +54,22 @@ public class Fish : MonoBehaviour
     public float avoidDist = .5f;           //How close to an avoidable object does the member need to be, to swim away.
     public float aloneSpeed = 1.5f;         //Move faster while alone
 
+    private float restDownSpeed = 0;
+
     public float turnTimer = 2f;
     //public float interactTimer = .2f;
     public float viewDistance = 2f;
-
 
     public string[] dontCollideWith;        //Strings with the names of objects you dont want fish to collide with. Other fish is one example since the rules and raycasts detrmine what to do when they get near. Glass sides are handled more efficiently by RotationSwitch() as another example, and should therefore not be included in CollisionDetection.
     //public string[] visibleObjects;         //Names of objects that will be processed by the fishVision function.
     public string terrainNodeName = "OctreeNode";   //(Not needed with regular terrains, use tag instead) Replace with the name (or part of it) of the terrain or terrain nodes you want to hit with raycasting. Can be done simpler with tags, but not when using a voxel terrain generated with Cubiquity. 
     public Transform head;
+
+    public float exhaustionLimit = 100f;
+    public bool canRest;
+    private Vector3 restPosition;
+    private bool grounded;
+    private float restInRange;
 
     #endregion
 
@@ -76,6 +88,8 @@ public class Fish : MonoBehaviour
 
         //Choose a random initial goal.
         goalPos = flock.getGoalPos();
+
+        exhausted = Random.Range(0, 80);
     }
 
     void Update()
@@ -83,6 +97,7 @@ public class Fish : MonoBehaviour
         //Fill the array of fish from the GlobalFlock instance. Can't do this in Start() since the array is not full yet until the last fish is instatiated. Every fish needs to do this of course
         if (!instatiated)
             InstatiateFish(); 
+
         //What needs to happen before the state update
         PreStateUpdate();
 
@@ -104,24 +119,75 @@ public class Fish : MonoBehaviour
                     break;
             }
 
-        if (speed < .5)
-            speed = CalculateSpeed(.8f, true);
+        if (speed < .1f) //Speed safety check
+        {
+            //speed = CalculateSpeed(.8f, true);
+            //print("speed too low");
+        }
 
-        //What needs to happen after the state update
+        //Whatever needs to happen after the state update
         PostStateUpdate();
 
+
+        if (state == States.resting)
+        {
+            /*CalculateSpeed(0.15f, true);
+            if (!grounded)
+            {
+                //
+                //Rotate(new Vector3(1,1,1));
+                restDownSpeed = -.01f;
+                Rotate(transform.parent.transform.position);
+                Rotate(flock.getRandomRestingPosInRange(transform.position,1000f).transform.position);
+            }
+            else {
+                Rotate(new Vector3(0,downSurfaceAngle.y*90,0));
+                turning = true;
+                restDownSpeed = 0;
+            } */           
+        }
         //Move along the fish's local Z axis (Forward)
         transform.Translate(new Vector3(0, 0, speed * Time.deltaTime));
     }
 
-    void FixedUpdate() {
+    #region Pre & Post Updates
+    private void PreStateUpdate()
+    {
+        UpdateTimers();
+
+        /*if(state != States.resting)
+            if (exhausted >= exhaustionLimit * 0.8f)
+            {
+                if (grounded) {
+                    //print("can rest");
+                    if(canRest)
+                        state = States.resting;
+                }
+
+                /*Vector3 thisPos = transform.position;
+                GameObject restPos = flock.getRandomRestingPosInRange(transform.position, 20f);
+
+                if (restPos.transform.position != thisPos)
+                {
+                    print("rest state");
+                    state = States.resting;
+                    restPosition = restPos.transform.position;
+                }*/
+
+            //}
 
 
     }
 
-    #region Pre & Post Updates
-    private void PreStateUpdate() //This will only happen if it is not overwritten by the current state, or PostAllStatesUpdate()
+    private void UpdateTimers()
     {
+        if (restInRange > 0)
+            restInRange -= Time.deltaTime;
+        if (exhausted <= exhaustionLimit && state != States.resting)
+        {
+            exhausted += Time.deltaTime * 0.5f;
+        }
+
         if (turning)
         {
             turnTimer -= Time.deltaTime;
@@ -141,8 +207,6 @@ public class Fish : MonoBehaviour
                 interactTimer = initInteractTimer;
             }
         }*/
-
-
     }
 
     private void PostStateUpdate() //This will owerwrite changes made by the current state.
@@ -183,17 +247,21 @@ public class Fish : MonoBehaviour
 
     }
 
+
+    #endregion
+
+    #region Collision
     void OnCollisionEnter(Collision col)
     {
         //if(!interacting)
-            CollisionReaction(col, Color.green);
+        CollisionReaction(col, Color.green);
     }
 
 
     void OnCollisionStay(Collision col)
     {
         //if (!interacting)
-            CollisionReaction(col, Color.red);
+        CollisionReaction(col, Color.red);
     }
 
     private void CollisionReaction(Collision col, Color c)
@@ -212,34 +280,12 @@ public class Fish : MonoBehaviour
                 //interacting = true;
                 //print(contact.otherCollider.transform.name);
                 Debug.DrawRay(contact.point, contact.normal, Color.green, .3f);
-                avoidTerrainDirection = contact.normal*.5f;
+                avoidTerrainDirection = contact.normal * .5f;
                 Rotate(avoidTerrainDirection);
                 CalculateSpeed(1f, true);
 
             }
         }
-    }
-
-
-    private bool TerrainCollision()
-    {
-        //Collision safety check
-        
-        avoidTerrainDirection = Vector3.zero;
-        Collider[] hitColliders = Physics.OverlapSphere(transform.position, .2f);
-        foreach (Collider c in hitColliders)
-        {
-            if (!c.transform.name.Contains("Sardine") && !c.transform.name.Contains("Bone") && 
-                !c.transform.name.Contains("Glass") && !c.transform.name.Contains("Shark") &&
-                !c.transform.name.Contains("Bush") && !c.transform.name.Contains("Goal"))
-            {
-                //print(c.transform.name);
-                avoidTerrainDirection = -(c.gameObject.transform.position - transform.position);
-                return true;
-            }
-
-        }
-        return false;
     }
     #endregion
 
@@ -248,21 +294,23 @@ public class Fish : MonoBehaviour
     {
         RaycastHit hit;
         headPos = head.transform.position;
+        grounded = false;
+        float drawTime = .3f;
         //bool turned = false;
 
         //Forward Ray
         //Quaternion rot = transform.rotation;
         Ray rayForward = new Ray(headPos, transform.forward);
-        if (Physics.Raycast(rayForward, out hit, viewDistance))
+        if (Physics.Raycast(rayForward, out hit, viewDistance*.8f))
         {
 
             //Rotate to match the x and y eulerAngles of the part of the terrain hit.
             if (hit.transform.name.Contains(terrainNodeName) || hit.transform.tag.Equals("Prop"))
             {
-                Debug.DrawRay(headPos, transform.forward * viewDistance, Color.cyan, 2f);
+                Debug.DrawRay(headPos, transform.forward * viewDistance*.8f, Color.cyan, drawTime);
                 //print(hit.normal.x + " " +transform.position.normalized.x);
                 //print(hit.transform.tag + " or "+ hit.transform.name);
-                Rotate(new Vector3(hit.normal.x, hit.normal.y, 0));//hit.normal.x, hit.normal.z
+                Rotate(new Vector3(hit.normal.x, 0, 0));//hit.normal.x, hit.normal.z
                                                                    //turned = true; interacting = true;
                                                                    //Stransform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(-transform.forward), rotationSpeed * Time.deltaTime);
             }
@@ -270,7 +318,7 @@ public class Fish : MonoBehaviour
             //If the hit result is another fish in front of this one and it's in another group, sometimes switch to that group
             if (hit.transform.tag.Equals("FlockEntity"))
             {
-                Debug.DrawRay(transform.position, transform.forward * viewDistance * 1.5f, Color.cyan, .3f);
+                Debug.DrawRay(transform.position, transform.forward * viewDistance*.8f, Color.white, drawTime);
                 if (Random.Range(0, 20) < 1f && hit.transform.GetComponent<Fish>().GetGoal() != goalPos && transform.parent == hit.transform.parent)
                 {
                     goalPos = hit.transform.GetComponent<Fish>().GetGoal();
@@ -279,57 +327,79 @@ public class Fish : MonoBehaviour
 
         }
 
-        //Up Ray
-        /*
-        Ray rayUp = new Ray(transform.position, transform.up);
-        if (Physics.Raycast(rayUp, out hit, viewDistance) && !turned)
-        {
-            if (hit.transform.name.Contains("Octree"))
-            {
-                Debug.DrawRay(transform.position, transform.up * viewDistance, Color.cyan);
-                Rotate(new Vector3(hit.normal.x, hit.normal.y, 0)*2);
-                turned = true; interacting = true;
-            }
-        }*/
-        Vector3 rayStartPos = new Vector3(0, 0, 0);
-        //Down Ray
-        Ray rayDown = new Ray(headPos, -transform.up);
-        if (Physics.Raycast(rayDown, out hit, viewDistance))
+        bool turnedUpDown = false;
+        //Up Ray       
+        Ray rayUp = new Ray(headPos, transform.up);
+        if (Physics.Raycast(rayUp, out hit, viewDistance*.5f))
         {
             if (hit.transform.name.Contains(terrainNodeName) || hit.transform.tag.Equals("Prop"))
             {
-                Debug.DrawRay(headPos, -transform.up * viewDistance, Color.red, .3f);
-                Rotate(new Vector3(0, hit.normal.y, 0));//*.65f
-                                                        //turned = true; interacting = true;
+                Debug.DrawRay(headPos, transform.up * viewDistance*.5f, Color.red,drawTime);
+                Rotate(new Vector3(0, hit.normal.y, 0));
+                turnedUpDown = true;
             }
         }
 
-        //Right Ray
-        Ray rayRight = new Ray(headPos, transform.right);
-        if (Physics.Raycast(rayRight, out hit, viewDistance))
+        //Down Ray
+        Ray rayDown = new Ray(headPos, -transform.up);
+        if (Physics.Raycast(rayDown, out hit, viewDistance*.5f) && !turnedUpDown)
         {
             if (hit.transform.name.Contains(terrainNodeName) || hit.transform.tag.Equals("Prop"))
             {
-                Debug.DrawRay(transform.position, (transform.right) * viewDistance, Color.blue);
-                Rotate(new Vector3(hit.normal.x, hit.normal.y, hit.normal.z));
-                //turned = true; interacting = true;
+                grounded = true; //If the fish needs to rest, go in to resting state
+                Debug.DrawRay(headPos, -transform.up * viewDistance * .5f, Color.red, drawTime);
+                downSurfaceAngle = new Vector3(hit.normal.x, hit.normal.y, hit.normal.z);
+                Rotate(new Vector3(0, hit.normal.y, 0));//*.65f                                                      
+            }
+        }
+
+        bool turned = false;
+        //Right Ray
+        Ray rayRight = new Ray(headPos, transform.right);
+        if (Physics.Raycast(rayRight, out hit, viewDistance*0.5f))
+        {
+            if (hit.transform.name.Contains(terrainNodeName) || hit.transform.tag.Equals("Prop"))
+            {
+                Debug.DrawRay(transform.position, (transform.right) * viewDistance * 0.5f, Color.blue,drawTime);
+                Rotate(new Vector3(hit.normal.x, 0, 0));
+                turned = true;
             }
         }
 
         //Left Ray
         Ray rayLeft = new Ray(transform.position, -transform.right);
-        if (Physics.Raycast(rayLeft, out hit, viewDistance))
+        if (Physics.Raycast(rayLeft, out hit, viewDistance*0.5f) && !turned)
         {
             if (hit.transform.name.Contains(terrainNodeName) || hit.transform.tag.Equals("Prop"))
             {
-                Debug.DrawRay(transform.position, -transform.right * viewDistance, Color.blue);
-                Rotate(new Vector3(hit.normal.x, hit.normal.y, hit.normal.z));
+                Debug.DrawRay(transform.position, -transform.right * viewDistance * 0.5f, Color.blue, drawTime);
+                Rotate(new Vector3(hit.normal.x, 0,0));
                 //turned = true; interacting = true;
             }
         }
 
+        //Rest Down Ray
+        Ray rayRestDown = new Ray(headPos, -Vector3.up);
+        if (exhausted >= exhaustionLimit*.6f || state == States.resting)//If exhausted or resting
+            if (Physics.Raycast(rayRestDown, out hit, viewDistance * 5f))
+            {
+                if (hit.transform.name.Contains(terrainNodeName) || hit.transform.tag.Equals("Prop"))
+                {
+                    if (state != States.resting)
+                        state = States.resting;
+                    if(restInRange < 3f)
+                        restInRange = 3f;
 
-
+                    //grounded = true; //If the fish needs to rest, switch to resting state
+                    Debug.DrawRay(headPos, -Vector3.up * viewDistance * 5f, Color.black, 2f);
+                    if (Vector3.Distance(transform.position, hit.point) > 3) {
+                        Rotate(-Vector3.up*Time.deltaTime);
+                    }
+                        
+                    //downSurfaceAngle = new Vector3(hit.normal.x, hit.normal.y, hit.normal.z);
+                    //Rotate(new Vector3(0, hit.normal.y, 0));//*.65f                                                      
+                }
+            }
     }
     #endregion
 
@@ -404,7 +474,20 @@ public class Fish : MonoBehaviour
 
     private void RestingUpdate()
     {
-        
+        Debug.DrawRay(transform.position, Vector3.up, Color.magenta, .3f);
+
+        //Return to flocking if rested
+        exhausted -= Time.deltaTime;
+        if (exhausted <= exhaustionLimit * 0.1f)
+        {
+            print("return to flock");
+            state = States.flocking;
+        }
+
+        if(restInRange <= 0)
+            state = States.flocking;
+        speed = utilities.slightlyRandomizeValue(initSpeed, .8f)*.3f; 
+
     }
     #endregion
 
@@ -415,11 +498,10 @@ public class Fish : MonoBehaviour
         Collider[] hitColliders = Physics.OverlapSphere(transform.position, scaredDist);
         foreach (Collider c in hitColliders)
         {
-            //if(c.transform.name.Contains(terrainName))
-                //print(c.transform.name);
-            if (c.gameObject.GetComponent<AvoidObject>() != null)
+            if (c.gameObject.GetComponent<AvoidObject>() != null && c.gameObject != gameObject)
             {
                 avoidDirection = -(c.gameObject.transform.position - transform.position);
+                state = States.flocking;
                 return true;
             }
 
@@ -436,6 +518,7 @@ public class Fish : MonoBehaviour
             if (c.gameObject.GetComponent<ScaryObject>() != null)
             {
                 scaredDirection = -(c.gameObject.transform.position - transform.position);
+                state = States.flocking;
                 return true;
             }
 
@@ -481,9 +564,6 @@ public class Fish : MonoBehaviour
         instatiated = true;
     }
 
-    private void SwimAlongSurface() {
-        print("SwimAlongSurface() Not implemented yet");
-    }
     #endregion
 
     #region Accessors & Internal Utilities

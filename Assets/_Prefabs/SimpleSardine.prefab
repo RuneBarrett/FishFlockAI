@@ -940,7 +940,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1000013585554242}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.067, z: 0.18}
+  m_LocalPosition: {x: 0, y: 0.067, z: 0.122}
   m_LocalScale: {x: 0.05, y: 0.05, z: 0.05}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_Children: []
@@ -1223,7 +1223,7 @@ MonoBehaviour:
   fleeSpeed: 4
   avoidDist: 0.8
   aloneSpeed: 2.5
-  turnTimer: 1.5
+  turnTimer: 1
   viewDistance: 2
   dontCollideWith:
   - Glass
@@ -1231,6 +1231,8 @@ MonoBehaviour:
   - Bush
   terrainNodeName: OctreeNode
   head: {fileID: 4000013098861330}
+  exhaustionLimit: 100
+  canRest: 1
 --- !u!136 &136000013638050360
 CapsuleCollider:
   m_ObjectHideFlags: 1

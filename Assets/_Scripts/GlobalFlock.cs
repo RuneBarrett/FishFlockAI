@@ -21,14 +21,17 @@ public class GlobalFlock : MonoBehaviour
     private FlockAIUtilities utilities;
     private GameObject[] allFish;           //Holds all members
 
-    public GameObject[] goals;              //Contains the amount of goal meshes to use. Each goal is a common posistion that used to adjust the position of all members in one group. The amount of goals determines how many groups your flock can form.
-    public GameObject fishPrefab;           //Whatever fish/bird/human/particle/bacteria you want. The Fish.cs needs to be attached to the prefab.
-
     public int numFish = 30;                //How many members
+    public float changeGoalPosFreq = 2f;   //Randomizes goalPos around <changeGoalPosFreq> times in 1000 frames
+
+    public GameObject[] goals;              //Contains the amount of goal meshes to use. Each goal is a common posistion that used to adjust the position of all members in one group. The amount of goals determines how many groups your flock can form.
+    public GameObject[] restingAreas;       //Contains areas fit for resting. Use box meshes to define these. 
+
+    public GameObject fishPrefab;           //Whatever fish/bird/human/particle/bacteria you want. The Fish.cs needs to be attached to the prefab.
     public GameObject SpawnArea;            //The area members can spawn and move in.
     public bool randomizePrefabSize = true; //Whether or not the size of the prefab should be randomized.
     public float sizeModifier = .55f;        //If size is randomized, this is how much they will differ from their original size
-    public float changeGoalPosFreq = 2f;   //Randomizes goalPos around <changeGoalPosFreq> times in 1000 frames
+
 
     void Start()
     {
@@ -71,6 +74,26 @@ public class GlobalFlock : MonoBehaviour
     public Vector3 setRandomPosShortcut(float mod)
     {
         return utilities.setRandomPosInArea(SpawnArea, mod);
+    }
+
+   public GameObject getRandomRestingPosInRange(Vector3 pos, float detectDistance) {
+        /*restingAreas = RandomizeArray(restingAreas);
+        foreach (GameObject area in restingAreas)
+            if (Vector3.Distance(pos, area.transform.position) < detectDistance)
+                return area.transform.position; //+utilities.setRandomPosInArea(area,1f)*/
+        return restingAreas[0];
+    }
+
+    static GameObject[] RandomizeArray(GameObject[] arr)
+    {
+        for (int i = arr.Length - 1; i > 0; i--)
+        {
+            int r = (int)Random.Range(0, i);
+            GameObject tmp = arr[i];
+            arr[i] = arr[r];
+            arr[r] = tmp;
+        }
+        return arr;
     }
 
     public GameObject[] getAllFish()
