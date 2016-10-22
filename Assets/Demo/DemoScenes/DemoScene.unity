@@ -3903,10 +3903,6 @@ MonoBehaviour:
   - {fileID: 1078858257}
   restingAreas:
   - {fileID: 1510555296}
-  - {fileID: 1855193675}
-  - {fileID: 1912503568}
-  - {fileID: 1531953426}
-  - {fileID: 528300994}
   fishPrefab: {fileID: 1000011440699570, guid: 1255888c8900f81449bbd259b4d50366, type: 2}
   SpawnArea: {fileID: 810584939}
   randomizePrefabSize: 1

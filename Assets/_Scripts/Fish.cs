@@ -647,6 +647,7 @@ public class Fish : MonoBehaviour
                 transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(dir), rotationSpeed * Time.deltaTime);
         }
     }
+    //
 
     private float CalculateSpeed(float burst, bool init)
     {   //The burst parameter in CalulateSpeed is a speed modifyer. 1f means base speed, higher = faster, lower = slower.
