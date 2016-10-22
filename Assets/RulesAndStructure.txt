@@ -19,10 +19,10 @@ State 1: Flocking (The usual state for a fish)
 		e. Sometimes when looking straight at another fish, switch to its group
 		
 
-State 2: Resting (Lying still, or moving slowly) (Entered from: Flocking) (NOT YET IMPLEMENTED)
-		Entered: After a set amount of exhaustion is reached / Semi Random Time spent / other condition
-		a. Search for a place with good resting conditions (shadow/hiding places) (NOT YET IMPLEMENTED)
-		a. Move slowly with intervals of lying still. (NOT YET IMPLEMENTED)
+State 2: Resting (Lying still, or moving slowly) (Entered from: Flocking)
+		Entered: After a set amount of exhaustion is reached
+		a. Search for a place with good resting conditions 
+		a. Move slowly with intervals of lying still. 
 
 State 3: Playful (Interacting in a playful way with one ore more other playful fish) (NOT YET IMPLEMENTED) (remember to include the seperation rule)
 		Entered: After a set amount of playfulness is reached

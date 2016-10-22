@@ -88,18 +88,21 @@ public class GlobalFlock : MonoBehaviour
         //restingAreas = RandomizeArray(restingAreas);
         GameObject newPosGO = restingAreas[0];
         bool found = false;
+        restingAreas = RandomizeArray(restingAreas);
         foreach (GameObject area in restingAreas)
         {
-            if (Vector3.Distance(pos, area.transform.position) < detectDistance &&
+            if (Vector3.Distance(pos, area.transform.position) <= detectDistance &&
                Vector3.Distance(area.transform.position, pos) < Vector3.Distance(newPosGO.transform.position, pos))
             {
+                
                 newPosGO = area;
                 found = true;
             }
         }
+
         //return area; //+utilities.setRandomPosInArea(area,1f)*/
         if (found)
-            return newPosGO.transform.position;
+            return newPosGO.transform.position;//utilities.setRandomPosInArea(newPosGO, 1f);
         else
             return pos;
     }

@@ -1218,6 +1218,7 @@ MonoBehaviour:
   applyRulesFactor: 8
   neighborRange: 4
   restingNeighborDistance: 5
+  restingGroundDistance: 3
   tooCloseRange: 2
   groupSpeedReset: 0.85
   scaredDist: 4
@@ -1226,6 +1227,7 @@ MonoBehaviour:
   aloneSpeed: 2.5
   turnTimer: 1
   stateChangeTimer: 3
+  rotateTimer: 0
   viewDistance: 2
   dontCollideWith:
   - Glass

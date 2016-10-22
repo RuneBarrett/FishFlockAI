@@ -14,6 +14,7 @@ public class Fish : MonoBehaviour
     private float initSpeed;                //Each members original speed. Not changing. 
     private float initTurnTimer;            //Used for resetting the turntimer
     private float initStateChangeTimer;
+    private float initRotateTimer;
     //private float initInteractTimer;
     //private Vector3 averageHeading;
     //private Vector3 averagePosition;
@@ -47,6 +48,8 @@ public class Fish : MonoBehaviour
     public float applyRulesFactor = 5f;     //Apply the 3 basic rules only one in <applyRulesFactor> times. This allows fish to sometimes swim away from the group, etc.
     public float neighborRange = 5f;        //When is a member considered a neighbor, and is thus eligible for grouping.
     public float restingNeighborDistance = 5f;
+    public float restingGroundDistance;
+
 
     public float tooCloseRange = 1f;        //When is another member too close.
     public float groupSpeedReset = .7f;     //The approximate speed a group will start with in the beginning of a frame. The avarage speed is then calculated including this number.
@@ -61,6 +64,7 @@ public class Fish : MonoBehaviour
 
     public float turnTimer = 2f;
     public float stateChangeTimer = 3f;
+    public float rotateTimer;
     //public float interactTimer = .2f;
     public float viewDistance = 2f;
 
@@ -90,6 +94,7 @@ public class Fish : MonoBehaviour
         initSpeed = speed;
         initTurnTimer = turnTimer;
         initStateChangeTimer = stateChangeTimer;
+        initRotateTimer = rotateTimer;
         //initInteractTimer = interactTimer;
 
         //Set the speed to a value slightly higher or lower, so the fish will move with varying speeds.
@@ -166,6 +171,8 @@ public class Fish : MonoBehaviour
             restInRangeTimer -= Time.deltaTime;
         if (stateChangeTimer > 0)
             stateChangeTimer -= Time.deltaTime;
+        if (rotateTimer > 0)
+            rotateTimer -= Time.deltaTime;
 
         if (exhausted <= exhaustionLimit && state != States.resting)
         {
@@ -296,17 +303,20 @@ public class Fish : MonoBehaviour
                 bool rotate = false;
                 Vector3 dir = Vector3.zero;
 
-                if (restGoalPos != transform.position) {
+                if (restGoalPos != transform.position && Vector3.Distance(restGoalPos, transform.position) > restingGroundDistance)
+                {
                     dir += restGoalPos;
                     rotate = true;
                 }
+                else
+                    restGoalPos = transform.position;
 
-                if (Vector3.Distance(transform.position, hit.point) >= 2 && hit.point.y < transform.position.y)
+                if (Vector3.Distance(transform.position, hit.point) >= restingGroundDistance && hit.point.y < transform.position.y)
                 {
                     dir += new Vector3(0, -.5f, 0);
                     rotate = true;          
                 }
-                if (Vector3.Distance(transform.position, hit.point) >= 2 && hit.point.y > transform.position.y)
+                if (Vector3.Distance(transform.position, hit.point) >= restingGroundDistance && hit.point.y > transform.position.y)
                 {
                     dir += new Vector3(0, .5f, 0);
                     rotate = true;
@@ -536,10 +546,10 @@ public class Fish : MonoBehaviour
         neighborInRangeTimer -= Time.deltaTime;
 
         //Apply rest grouping rules
-        if (Random.Range(0, applyRulesFactor*2) < 1)
+        if (Random.Range(0, applyRulesFactor) < 1)
         {
             Debug.DrawRay(transform.position, Vector3.up, Color.magenta, .3f);
-            speed = utilities.slightlyRandomizeValue(initSpeed, .8f) * .4f;//!!dont do every frame
+            speed = utilities.slightlyRandomizeValue(initSpeed, .8f) * .4f;
 
             //Resting group behavior
             ArrayList restingGroup = new ArrayList();
@@ -630,8 +640,12 @@ public class Fish : MonoBehaviour
     #region Utilities
     private void Rotate(Vector3 dir)
     {
-        if(dir != Vector3.zero)
-            transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(dir), rotationSpeed * Time.deltaTime);
+        if (rotateTimer <= 0)
+        {
+            rotateTimer = initRotateTimer;
+            if (dir != Vector3.zero)
+                transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(dir), rotationSpeed * Time.deltaTime);
+        }
     }
 
     private float CalculateSpeed(float burst, bool init)
