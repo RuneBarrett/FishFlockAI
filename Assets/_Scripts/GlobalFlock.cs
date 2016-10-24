@@ -86,6 +86,8 @@ public class GlobalFlock : MonoBehaviour
 
    public Vector3 getRandomRestingPosInRange(Vector3 pos, float detectDistance) {
         //restingAreas = RandomizeArray(restingAreas);
+        if (restingAreas.Length == 0)
+            return pos;
         GameObject newPosGO = restingAreas[0];
         bool found = false;
         restingAreas = RandomizeArray(restingAreas);

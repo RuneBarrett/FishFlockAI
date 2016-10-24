@@ -30,6 +30,6 @@ State 3: Playful (Interacting in a playful way with one ore more other playful f
 		b. Chase other fish (NOT YET IMPLEMENTED)
 
 State 4: Curious (Stay close to and circle around an interesting object)(NOT YET IMPLEMENTED)
-State 6: Hungry (Look for food)(NOT YET IMPLEMENTED)
+State 6: Hungry (Look for food/hunt)(NOT YET IMPLEMENTED)
 
 

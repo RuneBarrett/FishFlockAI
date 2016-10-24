@@ -33,6 +33,9 @@ public class Fish : MonoBehaviour
 
     private float exhausted;
 
+    private Vector3 targetPos;
+    private float targetSpeed;
+
     Vector3 downSurfaceAngle;
 
 
@@ -80,6 +83,7 @@ public class Fish : MonoBehaviour
     private float restInRangeTimer;
     private float neighborInRangeTimer;
     private Vector3 restGoalPos;
+    private Quaternion targetRotation;
 
 
 
@@ -133,35 +137,13 @@ public class Fish : MonoBehaviour
                     break;
             }
 
-        if (speed < .1f) //Speed safety check
-        {
-            //speed = CalculateSpeed(.8f, true);
-            //print("speed too low");
-        }
-
         //Whatever needs to happen after the state update
         PostStateUpdate();
 
-
-        if (state == States.resting)
-        {
-            /*CalculateSpeed(0.15f, true);
-            if (!grounded)
-            {
-                //
-                //Rotate(new Vector3(1,1,1));
-                restDownSpeed = -.01f;
-                Rotate(transform.parent.transform.position);
-                Rotate(flock.getRandomRestingPosInRange(transform.position,1000f).transform.position);
-            }
-            else {
-                Rotate(new Vector3(0,downSurfaceAngle.y*90,0));
-                turning = true;
-                restDownSpeed = 0;
-            } */           
-        }
         //Move along the fish's local Z axis (Forward)
+        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
         transform.Translate(new Vector3(0, 0, speed * Time.deltaTime));
+
     }
 
     #region Pre & Post Updates
@@ -256,7 +238,7 @@ public class Fish : MonoBehaviour
     }
 
     private void SwitchToRestStateIfExhausted()
-    {   //If exhausted or resting
+    {   //If exhausted or already resting
         if ((exhausted >= exhaustionLimit * .85f || state == States.resting) && canRest)
         {
             
@@ -640,18 +622,15 @@ public class Fish : MonoBehaviour
     #region Utilities
     private void Rotate(Vector3 dir)
     {
-        if (rotateTimer <= 0)
-        {
-            rotateTimer = initRotateTimer;
             if (dir != Vector3.zero)
-                transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(dir), rotationSpeed * Time.deltaTime);
-        }
+                targetRotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(dir), rotationSpeed);
+        //transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(dir), rotationSpeed * Time.deltaTime);
     }
     //
 
     private float CalculateSpeed(float burst, bool init)
     {   //The burst parameter in CalulateSpeed is a speed modifyer. 1f means base speed, higher = faster, lower = slower.
-        if (init)
+        if (init || speed == 0)
             speed = initSpeed;
 
         speed *= burst;

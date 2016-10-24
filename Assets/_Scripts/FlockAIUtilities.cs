@@ -7,6 +7,8 @@ public class FlockAIUtilities
 
     public float slightlyRandomizeValue(float val, float modifier)
     {
+        if (modifier > val)
+            modifier = val*.9f;
         return val + val * Random.Range(-modifier, modifier);
     }
 
