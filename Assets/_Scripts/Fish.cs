@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEditor.Animations;
 //using Cubiquity;
 
 public class Fish : MonoBehaviour
@@ -76,6 +77,8 @@ public class Fish : MonoBehaviour
     public string terrainNodeName = "OctreeNode";   //(Not needed with regular terrains, use tag instead) Replace with the name (or part of it) of the terrain or terrain nodes you want to hit with raycasting. Can be done simpler with tags, but not when using a voxel terrain generated with Cubiquity. 
     public Transform head;
 
+    private Animator anim;
+
     public float exhaustionLimit = 100f;
     public bool canRest;
     private Vector3 restPosition;
@@ -92,7 +95,7 @@ public class Fish : MonoBehaviour
     void Start()
     {
         utilities = new FlockAIUtilities();
-
+        anim = GetComponent<Animator>();
         //volume = GameObject.FindGameObjectWithTag("Terrain").GetComponent<TerrainVolume>();
 
         initSpeed = speed;
@@ -107,7 +110,7 @@ public class Fish : MonoBehaviour
         //Choose a random initial goal.
         goalPos = flock.getGoalPos();
 
-        exhausted = Random.Range(60, 90);
+        exhausted = Random.Range(0, 90);
     }
 
     void Update()
@@ -141,8 +144,16 @@ public class Fish : MonoBehaviour
         PostStateUpdate();
 
         //Move along the fish's local Z axis (Forward)
+        float diff = speed - targetSpeed;
+        if (diff < 0)
+            speed += 0.1f;
+        if (diff > 0)
+            speed -= 0.1f;
+        //speed = targetSpeed;
+
         transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
         transform.Translate(new Vector3(0, 0, speed * Time.deltaTime));
+        anim.speed = speed * .4f;
 
     }
 
@@ -151,10 +162,9 @@ public class Fish : MonoBehaviour
     {
         if (restInRangeTimer > 0)
             restInRangeTimer -= Time.deltaTime;
+
         if (stateChangeTimer > 0)
             stateChangeTimer -= Time.deltaTime;
-        if (rotateTimer > 0)
-            rotateTimer -= Time.deltaTime;
 
         if (exhausted <= exhaustionLimit && state != States.resting)
         {
@@ -170,39 +180,6 @@ public class Fish : MonoBehaviour
                 turnTimer = initTurnTimer;
             }
         }
-
-        /*if (interacting)
-        {
-            interactTimer -= Time.deltaTime;
-            if (interactTimer <= 0)
-            {
-                interacting = false;
-                interactTimer = initInteractTimer;
-            }
-        }*/
-
-        /*if(state != States.resting)
-            if (exhausted >= exhaustionLimit * 0.8f)
-            {
-                if (grounded) {
-                    //print("can rest");
-                    if(canRest)
-                        state = States.resting;
-                }
-
-                /*Vector3 thisPos = transform.position;
-                GameObject restPos = flock.getRandomRestingPosInRange(transform.position, 20f);
-
-                if (restPos.transform.position != thisPos)
-                {
-                    print("rest state");
-                    state = States.resting;
-                    restPosition = restPos.transform.position;
-                }*/
-
-        //}
-
-
     }
 
     private void PostStateUpdate() //This will owerwrite changes made by the current state.
@@ -279,12 +256,12 @@ public class Fish : MonoBehaviour
                 if (restInRangeTimer < 3f)
                     restInRangeTimer = 3f;
 
+                //If there are a rest area nearby restGoalPos is set to that, otherwise it is set to transform.position
                 restGoalPos = flock.getRandomRestingPosInRange(transform.position, 7f) - transform.position;
-
-                //If ground is near move towards it
                 bool rotate = false;
                 Vector3 dir = Vector3.zero;
 
+                //If the distance between this object and the potential goal is long enough modify the direction and set the rotate flag to true
                 if (restGoalPos != transform.position && Vector3.Distance(restGoalPos, transform.position) > restingGroundDistance)
                 {
                     dir += restGoalPos;
@@ -293,6 +270,7 @@ public class Fish : MonoBehaviour
                 else
                     restGoalPos = transform.position;
 
+                //If the distance to the group or a surface above is 
                 if (Vector3.Distance(transform.position, hit.point) >= restingGroundDistance && hit.point.y < transform.position.y)
                 {
                     dir += new Vector3(0, -.5f, 0);
@@ -345,7 +323,7 @@ public class Fish : MonoBehaviour
                 //interacting = true;
                 //print(contact.otherCollider.transform.name);
                 Debug.DrawRay(contact.point, contact.normal, Color.green, .3f);
-                avoidTerrainDirection = contact.normal * .5f;
+                avoidTerrainDirection = contact.normal;
                 Rotate(avoidTerrainDirection);
                 CalculateSpeed(1f, true);
 
@@ -520,7 +498,6 @@ public class Fish : MonoBehaviour
         exhausted -= Time.deltaTime * 5;
         if (exhausted <= exhaustionLimit * 0.01f)
         {
-            //print("return to flock");
             state = States.flocking;
         }
 
@@ -531,7 +508,7 @@ public class Fish : MonoBehaviour
         if (Random.Range(0, applyRulesFactor) < 1)
         {
             Debug.DrawRay(transform.position, Vector3.up, Color.magenta, .3f);
-            speed = utilities.slightlyRandomizeValue(initSpeed, .8f) * .4f;
+            targetSpeed = utilities.slightlyRandomizeValue(initSpeed, .6f) * .4f;
 
             //Resting group behavior
             ArrayList restingGroup = new ArrayList();
@@ -630,11 +607,11 @@ public class Fish : MonoBehaviour
 
     private float CalculateSpeed(float burst, bool init)
     {   //The burst parameter in CalulateSpeed is a speed modifyer. 1f means base speed, higher = faster, lower = slower.
-        if (init || speed == 0)
-            speed = initSpeed;
+        if (init)
+            targetSpeed = initSpeed;
 
-        speed *= burst;
-        return utilities.slightlyRandomizeValue(speed, speedModifyer);
+        targetSpeed *= burst;
+        return utilities.slightlyRandomizeValue(targetSpeed, speedModifyer);
     }
 
     private bool TurnAroundSwitch()

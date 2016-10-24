@@ -2013,7 +2013,7 @@ MeshRenderer:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 771733579}
-  m_Enabled: 0
+  m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_MotionVectors: 1
@@ -3119,7 +3119,7 @@ MeshRenderer:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1078858257}
-  m_Enabled: 0
+  m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_MotionVectors: 1
@@ -3903,6 +3903,10 @@ MonoBehaviour:
   - {fileID: 1078858257}
   restingAreas:
   - {fileID: 1510555296}
+  - {fileID: 1855193675}
+  - {fileID: 1912503568}
+  - {fileID: 1531953426}
+  - {fileID: 528300994}
   fishPrefab: {fileID: 1000011440699570, guid: 1255888c8900f81449bbd259b4d50366, type: 2}
   SpawnArea: {fileID: 810584939}
   randomizePrefabSize: 1
@@ -4760,7 +4764,7 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1510555296}
   m_LocalRotation: {x: -0.008777848, y: -0.011093474, z: 0.08403505, w: 0.9963624}
-  m_LocalPosition: {x: -11.208, y: 3.583, z: 15.654}
+  m_LocalPosition: {x: -11.208, y: 3.9, z: 15.654}
   m_LocalScale: {x: 3.413284, y: 1.9097928, z: 3.9545436}
   m_LocalEulerAnglesHint: {x: -0.88500005, y: -1.312, z: 9.405001}
   m_Children: []
@@ -5194,7 +5198,8 @@ MonoBehaviour:
   numFish: 3
   changeGoalPosFreq: 2
   goals:
-  - {fileID: 1247961382}
+  - {fileID: 974873859}
+  - {fileID: 193261304}
   restingAreas:
   - {fileID: 1275273654}
   fishPrefab: {fileID: 1000010038324722, guid: 1d1fcce6c96887240a9a938e887b76f0, type: 2}
@@ -5959,7 +5964,7 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1912503568}
   m_LocalRotation: {x: 0.00945741, y: -0.98823893, z: 0.108480245, w: 0.107360855}
-  m_LocalPosition: {x: 16.97, y: 1.38, z: -4.44}
+  m_LocalPosition: {x: 16.97, y: 1.128, z: -5.239}
   m_LocalScale: {x: 3.6999996, y: 2.2339895, z: 6.32}
   m_LocalEulerAnglesHint: {x: 12.5, y: -167.57, z: 0.27}
   m_Children: []

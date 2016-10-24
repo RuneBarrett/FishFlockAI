@@ -1213,9 +1213,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 2.5
-  speedModifyer: 0.6
-  rotationSpeed: 2.3
-  applyRulesFactor: 8
+  speedModifyer: 4
+  rotationSpeed: 1.2
+  applyRulesFactor: 20
   neighborRange: 4
   restingNeighborDistance: 5
   restingGroundDistance: 3
@@ -1228,7 +1228,7 @@ MonoBehaviour:
   turnTimer: 1
   stateChangeTimer: 3
   rotateTimer: 0
-  viewDistance: 2
+  viewDistance: 2.5
   dontCollideWith:
   - Glass
   - Bone
