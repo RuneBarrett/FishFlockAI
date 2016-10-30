@@ -145,7 +145,7 @@ public class Fish : MonoBehaviour
 
         //Move along the fish's local Z axis (Forward)
         float diff = speed - targetSpeed;
-        if (diff < 0)
+        if (diff < 0f)
             speed += 0.1f;
         if (diff > 0)
             speed -= 0.1f;

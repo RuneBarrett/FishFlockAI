@@ -388,9 +388,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ff26de87c9daa954c961b50e5a32e00a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 2
+  speed: 4
   speedModifyer: 1.5
-  rotationSpeed: 0.7
+  rotationSpeed: 1
   applyRulesFactor: 16
   neighborRange: 5
   restingNeighborDistance: 5
@@ -404,7 +404,7 @@ MonoBehaviour:
   turnTimer: 3
   stateChangeTimer: 3
   rotateTimer: 0
-  viewDistance: 2
+  viewDistance: 4
   dontCollideWith:
   - Glass
   - Bone

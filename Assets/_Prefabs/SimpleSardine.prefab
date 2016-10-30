@@ -1215,14 +1215,14 @@ MonoBehaviour:
   speed: 2.5
   speedModifyer: 4
   rotationSpeed: 1.2
-  applyRulesFactor: 20
+  applyRulesFactor: 30
   neighborRange: 4
   restingNeighborDistance: 5
   restingGroundDistance: 3
-  tooCloseRange: 2
+  tooCloseRange: 3
   groupSpeedReset: 0.85
-  scaredDist: 4
-  fleeSpeed: 4
+  scaredDist: 6
+  fleeSpeed: 8
   avoidDist: 0.8
   aloneSpeed: 2.5
   turnTimer: 1
